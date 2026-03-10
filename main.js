@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="item-content">
                 <div class="item-date">${date}</div>
                 <div class="item-title">${name}</div>
-                <div class="item-stats">${weight} kg × ${reps} reps</div>
+                <div class="item-stats">${weight} kg × ${reps}회</div>
             </div>
         `;
         workoutList.prepend(li);
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (saved) {
             const workouts = JSON.parse(saved);
             workouts.reverse().forEach(w => {
-                const statsMatch = w.stats.match(/(\d+(\.\d+)?) kg × (\d+) reps/);
+                const statsMatch = w.stats.match(/(\d+(\.\d+)?) kg × (\d+)회/);
                 if (statsMatch) {
                     addTimelineItem(w.name, statsMatch[1], statsMatch[3], w.date);
                 } else {

@@ -3,58 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KintoreKun - 筋トレ君 / 근트레군</title>
+    <title>근트레군 - 디지털 운동 노트</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body class="diary-bg">
     <div class="container">
         <header class="header">
-            <h1 class="logo">KintoreKun <span>筋トレ君 / 근트레군</span></h1>
+            <h1 class="logo">근트레군 <span>Digital Workout Note</span></h1>
             <div class="profile-card">
                 <div class="input-group">
-                    <label for="user-weight">体重 / 체중 (kg)</label>
+                    <label for="user-weight">내 체중 (kg)</label>
                     <input type="number" id="user-weight" placeholder="0.0" step="0.1">
                 </div>
             </div>
         </header>
 
         <section class="recommendations">
-            <h2>今日の推奨重量 / 오늘의 권장 무게</h2>
+            <h2>오늘의 권장 무게</h2>
             <div class="cards-grid">
                 <div class="card bench">
-                    <span class="label">Bench Press (0.7x)</span>
+                    <span class="label">벤치프레스 (0.7배)</span>
                     <span class="value" id="bp-weight">0 kg</span>
                 </div>
                 <div class="card squat">
-                    <span class="label">Squat (1.0x)</span>
+                    <span class="label">스쿼트 (1.0배)</span>
                     <span class="value" id="sq-weight">0 kg</span>
                 </div>
                 <div class="card deadlift">
-                    <span class="label">Deadlift (1.2x)</span>
+                    <span class="label">데드리프트 (1.2배)</span>
                     <span class="value" id="dl-weight">0 kg</span>
                 </div>
             </div>
         </section>
 
         <section class="workout-entry">
-            <h2>運動日記を書く / 운동 일기 쓰기</h2>
+            <h2>운동 일기 쓰기</h2>
             <form id="workout-form" class="entry-form">
                 <div class="form-row">
-                    <input type="text" id="exercise-name" placeholder="種目 / 종목 (예: 벤치프레스)" required>
-                    <input type="number" id="workout-weight" placeholder="kg" required>
-                    <input type="number" id="workout-reps" placeholder="回 / 회" required>
-                    <button type="submit" class="save-btn">保存 / 저장</button>
+                    <input type="text" id="exercise-name" placeholder="종목명 (예: 벤치프레스)" required>
+                    <input type="number" id="workout-weight" placeholder="무게(kg)" required>
+                    <input type="number" id="workout-reps" placeholder="횟수" required>
+                    <button type="submit" class="save-btn">저장하기</button>
                 </div>
             </form>
         </section>
 
         <section class="timeline-section">
-            <h2>タイムライン / 타임라인</h2>
+            <h2>운동 기록 타임라인</h2>
             <ul id="workout-list" class="timeline">
-                <!-- Items added dynamically -->
+                <!-- 아이템이 동적으로 추가됩니다 -->
             </ul>
         </section>
     </div>
