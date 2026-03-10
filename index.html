@@ -13,81 +13,143 @@
 </head>
 <body class="diary-bg">
     <div class="container">
-        <header class="header">
-            <div class="logo-area">
-                <i class="fa-solid fa-book-journal-whills main-icon"></i>
-                <h1 class="logo">디지털 운동 노트 <span>Smart Workout Journal</span></h1>
-            </div>
-            <div class="profile-card">
-                <div class="input-group">
-                    <label for="user-weight"><i class="fa-solid fa-weight-scale"></i> 내 체중</label>
-                    <div class="weight-input-wrapper">
-                        <input type="number" id="user-weight" placeholder="0.0" step="0.1">
-                        <span class="unit">kg</span>
-                    </div>
-                </div>
-            </div>
-        </header>
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-target="workout-page">
+                <i class="fa-solid fa-pen-nib"></i> 운동 노트
+            </button>
+            <button class="tab-btn" data-target="mypage">
+                <i class="fa-solid fa-user"></i> 마이페이지
+            </button>
+        </nav>
 
-        <section class="recommendations">
-            <h2 class="section-title"><i class="fa-solid fa-dumbbell"></i> 오늘의 권장 무게</h2>
-            <div class="cards-grid">
-                <div class="card bench">
-                    <div class="card-icon"><i class="fa-solid fa-mound"></i></div>
-                    <span class="label">벤치프레스 (0.7배)</span>
-                    <span class="value" id="bp-weight">0 kg</span>
+        <!-- Workout Note Page -->
+        <div id="workout-page" class="page active">
+            <header class="header">
+                <div class="logo-area">
+                    <i class="fa-solid fa-book-journal-whills main-icon"></i>
+                    <h1 class="logo">디지털 운동 노트 <span>Smart Workout Journal</span></h1>
                 </div>
-                <div class="card squat">
-                    <div class="card-icon"><i class="fa-solid fa-person-arrow-down-to-line"></i></div>
-                    <span class="label">스쿼트 (1.0배)</span>
-                    <span class="value" id="sq-weight">0 kg</span>
+                <div class="profile-card mini-profile">
+                    <span id="display-nickname">반가워요!</span>
+                    <div class="mini-weight">
+                        <span id="display-weight">0.0</span> kg
+                    </div>
                 </div>
-                <div class="card deadlift">
-                    <div class="card-icon"><i class="fa-solid fa-angles-up"></i></div>
-                    <span class="label">데드리프트 (1.2배)</span>
-                    <span class="value" id="dl-weight">0 kg</span>
-                </div>
-            </div>
-        </section>
+            </header>
 
-        <section class="workout-entry">
-            <h2 class="section-title"><i class="fa-solid fa-pen-to-square"></i> 오늘의 운동 기록</h2>
-            <form id="workout-form" class="entry-form">
-                <div class="form-grid">
-                    <div class="input-wrapper">
-                        <label>종목명</label>
-                        <input type="text" id="exercise-name" placeholder="예: 벤치프레스" list="exercise-suggestions" required>
-                        <datalist id="exercise-suggestions">
-                            <option value="벤치프레스">
-                            <option value="스쿼트">
-                            <option value="데드리프트">
-                            <option value="오버헤드 프레스">
-                            <option value="바벨 로우">
-                        </datalist>
+            <section class="recommendations">
+                <h2 class="section-title"><i class="fa-solid fa-dumbbell"></i> 오늘의 권장 무게</h2>
+                <div class="cards-grid">
+                    <div class="card bench">
+                        <div class="card-icon"><i class="fa-solid fa-mound"></i></div>
+                        <span class="label">벤치프레스 (0.7배)</span>
+                        <span class="value" id="bp-weight">0 kg</span>
                     </div>
-                    <div class="input-wrapper">
-                        <label>무게 (kg)</label>
-                        <input type="number" id="workout-weight" placeholder="0" required>
+                    <div class="card squat">
+                        <div class="card-icon"><i class="fa-solid fa-person-arrow-down-to-line"></i></div>
+                        <span class="label">스쿼트 (1.0배)</span>
+                        <span class="value" id="sq-weight">0 kg</span>
                     </div>
-                    <div class="input-wrapper">
-                        <label>횟수 (reps)</label>
-                        <input type="number" id="workout-reps" placeholder="0" required>
+                    <div class="card deadlift">
+                        <div class="card-icon"><i class="fa-solid fa-angles-up"></i></div>
+                        <span class="label">데드리프트 (1.2배)</span>
+                        <span class="value" id="dl-weight">0 kg</span>
                     </div>
-                    <button type="submit" class="save-btn">
-                        기록하기(記録する)
-                    </button>
                 </div>
-            </form>
-        </section>
+            </section>
 
-        <section class="timeline-section">
-            <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> 운동 기록 리스트</h2>
-            <div class="notebook-area">
-                <ul id="workout-list" class="timeline">
-                    <!-- 아이템이 동적으로 추가됩니다 -->
-                </ul>
-            </div>
-        </section>
+            <section class="workout-entry">
+                <h2 class="section-title"><i class="fa-solid fa-pen-to-square"></i> 오늘의 운동 기록</h2>
+                <form id="workout-form" class="entry-form">
+                    <div class="form-grid">
+                        <div class="input-wrapper">
+                            <label>종목명</label>
+                            <input type="text" id="exercise-name" placeholder="예: 벤치프레스" list="exercise-suggestions" required>
+                            <datalist id="exercise-suggestions">
+                                <option value="벤치프레스">
+                                <option value="스쿼트">
+                                <option value="데드리프트">
+                                <option value="오버헤드 프레스">
+                                <option value="바벨 로우">
+                            </datalist>
+                        </div>
+                        <div class="input-wrapper">
+                            <label>무게 (kg)</label>
+                            <input type="number" id="workout-weight" placeholder="0" required>
+                        </div>
+                        <div class="input-wrapper">
+                            <label>횟수 (reps)</label>
+                            <input type="number" id="workout-reps" placeholder="0" required>
+                        </div>
+                        <button type="submit" class="save-btn">
+                            기록하기(記録する)
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="timeline-section">
+                <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> 운동 기록 리스트</h2>
+                <div class="notebook-area">
+                    <ul id="workout-list" class="timeline">
+                        <!-- 아이템이 동적으로 추가됩니다 -->
+                    </ul>
+                </div>
+            </section>
+        </div>
+
+        <!-- My Page -->
+        <div id="mypage" class="page">
+            <header class="header">
+                <div class="logo-area">
+                    <i class="fa-solid fa-user-gear main-icon"></i>
+                    <h1 class="logo">마이페이지 <span>My Profile Settings</span></h1>
+                </div>
+            </header>
+
+            <section class="user-info-section">
+                <form id="user-info-form" class="user-form">
+                    <div class="user-form-grid">
+                        <div class="user-input-group">
+                            <label><i class="fa-solid fa-id-badge"></i> 닉네임</label>
+                            <input type="text" id="user-nickname" placeholder="이름을 입력하세요">
+                        </div>
+                        <div class="user-input-group">
+                            <label><i class="fa-solid fa-cake-candles"></i> 나이</label>
+                            <input type="number" id="user-age" placeholder="나이">
+                        </div>
+                        <div class="user-input-group">
+                            <label><i class="fa-solid fa-arrows-up-down"></i> 키 (cm)</label>
+                            <input type="number" id="user-height" placeholder="0.0" step="0.1">
+                        </div>
+                        <div class="user-input-group">
+                            <label><i class="fa-solid fa-weight-scale"></i> 현재 체중 (kg)</label>
+                            <input type="number" id="user-weight" placeholder="0.0" step="0.1">
+                        </div>
+                        <div class="user-input-group">
+                            <label><i class="fa-solid fa-bullseye"></i> 목표 체중 (kg)</label>
+                            <input type="number" id="user-goal-weight" placeholder="0.0" step="0.1">
+                        </div>
+                    </div>
+                    <button type="submit" class="save-user-btn">정보 저장하기</button>
+                </form>
+            </section>
+
+            <section class="stats-overview">
+                <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> 나의 요약</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-label">BMI</span>
+                        <span class="stat-value" id="user-bmi">-</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">남은 목표</span>
+                        <span class="stat-value" id="weight-to-goal">-</span>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
     <script src="main.js"></script>
 </body>

@@ -36,23 +36,94 @@ body {
 
 .container {
     max-width: 900px;
-    margin: 3rem auto;
+    margin: 2rem auto;
     padding: 2.5rem;
     background: var(--card-bg);
     box-shadow: var(--shadow-md);
     border-radius: 16px;
     min-height: 90vh;
+    position: relative;
 }
 
+/* Tabs Navigation */
+.nav-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 10px 10px 0 0;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tab-btn:hover {
+    color: var(--accent-color);
+    background: #f8f9fa;
+}
+
+.tab-btn.active {
+    color: var(--accent-color);
+    border-bottom: 3px solid var(--accent-color);
+    margin-bottom: -3px;
+}
+
+/* Page Visibility */
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header & Mini Profile */
 .header {
-    margin-bottom: 3rem;
+    margin-bottom: 2.5rem;
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     flex-wrap: wrap;
     gap: 1.5rem;
     border-bottom: 1px solid #eee;
     padding-bottom: 1.5rem;
+}
+
+.mini-profile {
+    text-align: right;
+}
+
+#display-nickname {
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+.mini-weight {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+#display-weight {
+    font-weight: 700;
+    color: var(--primary-color);
 }
 
 .logo-area {
@@ -78,45 +149,6 @@ body {
     font-weight: 400;
     color: var(--text-muted);
     margin-top: -4px;
-}
-
-.profile-card {
-    background: #f8f9fa;
-    padding: 1rem 1.5rem;
-    border-radius: 12px;
-    border: 1px solid #edf2f7;
-}
-
-.input-group label {
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    margin-bottom: 0.5rem;
-    display: block;
-}
-
-.weight-input-wrapper {
-    display: flex;
-    align-items: baseline;
-    gap: 4px;
-}
-
-.input-group input {
-    border: none;
-    background: transparent;
-    border-bottom: 2px solid var(--accent-color);
-    padding: 0.2rem;
-    width: 70px;
-    text-align: center;
-    font-size: 1.3rem;
-    font-weight: 700;
-    outline: none;
-    color: var(--accent-color);
-}
-
-.unit {
-    font-weight: 500;
-    color: var(--text-muted);
 }
 
 /* Recommendations */
@@ -258,7 +290,6 @@ body {
     align-items: center;
     padding: 0 1rem;
     position: relative;
-    border-bottom: 1px solid transparent; /* Align with background lines */
 }
 
 .item-content {
@@ -267,12 +298,6 @@ body {
     justify-content: space-between;
     align-items: center;
     font-size: 1rem;
-}
-
-.item-info {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
 }
 
 .item-date {
@@ -293,8 +318,85 @@ body {
     font-style: italic;
 }
 
+/* User Form (My Page) */
+.user-form {
+    background: #fff;
+    padding: 2rem;
+    border: 1px solid #eee;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+}
+
+.user-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.user-input-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+}
+
+.user-input-group input {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 1rem;
+    outline: none;
+}
+
+.save-user-btn {
+    width: 100%;
+    margin-top: 2rem;
+    background: var(--success-color);
+    color: #fff;
+    border: none;
+    padding: 1rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.save-user-btn:hover {
+    background: #009e7f;
+}
+
+/* Stats (My Page) */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--accent-color);
+}
+
 @media (max-width: 850px) {
-    .form-grid {
+    .form-grid, .user-form-grid {
         grid-template-columns: 1fr 1fr;
     }
     .save-btn {
@@ -307,6 +409,9 @@ body {
         margin: 0;
         border-radius: 0;
         padding: 1.5rem;
+    }
+    .user-form-grid {
+        grid-template-columns: 1fr;
     }
     .header {
         flex-direction: column;
