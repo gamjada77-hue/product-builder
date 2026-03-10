@@ -51,33 +51,42 @@
         </section>
 
         <section class="workout-entry">
-            <h2 class="section-title"><i class="fa-solid fa-pen-to-square"></i> 오늘 운동 기록하기</h2>
+            <h2 class="section-title"><i class="fa-solid fa-pen-to-square"></i> 오늘의 운동 기록</h2>
             <form id="workout-form" class="entry-form">
                 <div class="form-grid">
                     <div class="input-wrapper">
                         <label>종목명</label>
-                        <input type="text" id="exercise-name" placeholder="예: 벤치프레스" required>
+                        <input type="text" id="exercise-name" placeholder="예: 벤치프레스" list="exercise-suggestions" required>
+                        <datalist id="exercise-suggestions">
+                            <option value="벤치프레스">
+                            <option value="스쿼트">
+                            <option value="데드리프트">
+                            <option value="오버헤드 프레스">
+                            <option value="바벨 로우">
+                        </datalist>
                     </div>
                     <div class="input-wrapper">
                         <label>무게 (kg)</label>
                         <input type="number" id="workout-weight" placeholder="0" required>
                     </div>
                     <div class="input-wrapper">
-                        <label>횟수</label>
+                        <label>횟수 (reps)</label>
                         <input type="number" id="workout-reps" placeholder="0" required>
                     </div>
                     <button type="submit" class="save-btn">
-                        <i class="fa-solid fa-check"></i> 저장하기
+                        기록하기(記録する)
                     </button>
                 </div>
             </form>
         </section>
 
         <section class="timeline-section">
-            <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> 운동 히스토리</h2>
-            <ul id="workout-list" class="timeline">
-                <!-- 아이템이 동적으로 추가됩니다 -->
-            </ul>
+            <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> 운동 기록 리스트</h2>
+            <div class="notebook-area">
+                <ul id="workout-list" class="timeline">
+                    <!-- 아이템이 동적으로 추가됩니다 -->
+                </ul>
+            </div>
         </section>
     </div>
     <script src="main.js"></script>
