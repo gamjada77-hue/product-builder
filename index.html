@@ -3,36 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>근트레군 - 디지털 운동 노트</title>
+    <title>디지털 운동 노트 - Workout Diary</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for better icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="diary-bg">
     <div class="container">
         <header class="header">
-            <h1 class="logo">근트레군 <span>Digital Workout Note</span></h1>
+            <div class="logo-area">
+                <i class="fa-solid fa-book-journal-whills main-icon"></i>
+                <h1 class="logo">디지털 운동 노트 <span>Smart Workout Journal</span></h1>
+            </div>
             <div class="profile-card">
                 <div class="input-group">
-                    <label for="user-weight">내 체중 (kg)</label>
-                    <input type="number" id="user-weight" placeholder="0.0" step="0.1">
+                    <label for="user-weight"><i class="fa-solid fa-weight-scale"></i> 내 체중</label>
+                    <div class="weight-input-wrapper">
+                        <input type="number" id="user-weight" placeholder="0.0" step="0.1">
+                        <span class="unit">kg</span>
+                    </div>
                 </div>
             </div>
         </header>
 
         <section class="recommendations">
-            <h2>오늘의 권장 무게</h2>
+            <h2 class="section-title"><i class="fa-solid fa-dumbbell"></i> 오늘의 권장 무게</h2>
             <div class="cards-grid">
                 <div class="card bench">
+                    <div class="card-icon"><i class="fa-solid fa-mound"></i></div>
                     <span class="label">벤치프레스 (0.7배)</span>
                     <span class="value" id="bp-weight">0 kg</span>
                 </div>
                 <div class="card squat">
+                    <div class="card-icon"><i class="fa-solid fa-person-arrow-down-to-line"></i></div>
                     <span class="label">스쿼트 (1.0배)</span>
                     <span class="value" id="sq-weight">0 kg</span>
                 </div>
                 <div class="card deadlift">
+                    <div class="card-icon"><i class="fa-solid fa-angles-up"></i></div>
                     <span class="label">데드리프트 (1.2배)</span>
                     <span class="value" id="dl-weight">0 kg</span>
                 </div>
@@ -40,19 +51,30 @@
         </section>
 
         <section class="workout-entry">
-            <h2>운동 일기 쓰기</h2>
+            <h2 class="section-title"><i class="fa-solid fa-pen-to-square"></i> 오늘 운동 기록하기</h2>
             <form id="workout-form" class="entry-form">
-                <div class="form-row">
-                    <input type="text" id="exercise-name" placeholder="종목명 (예: 벤치프레스)" required>
-                    <input type="number" id="workout-weight" placeholder="무게(kg)" required>
-                    <input type="number" id="workout-reps" placeholder="횟수" required>
-                    <button type="submit" class="save-btn">저장하기</button>
+                <div class="form-grid">
+                    <div class="input-wrapper">
+                        <label>종목명</label>
+                        <input type="text" id="exercise-name" placeholder="예: 벤치프레스" required>
+                    </div>
+                    <div class="input-wrapper">
+                        <label>무게 (kg)</label>
+                        <input type="number" id="workout-weight" placeholder="0" required>
+                    </div>
+                    <div class="input-wrapper">
+                        <label>횟수</label>
+                        <input type="number" id="workout-reps" placeholder="0" required>
+                    </div>
+                    <button type="submit" class="save-btn">
+                        <i class="fa-solid fa-check"></i> 저장하기
+                    </button>
                 </div>
             </form>
         </section>
 
         <section class="timeline-section">
-            <h2>운동 기록 타임라인</h2>
+            <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> 운동 히스토리</h2>
             <ul id="workout-list" class="timeline">
                 <!-- 아이템이 동적으로 추가됩니다 -->
             </ul>
