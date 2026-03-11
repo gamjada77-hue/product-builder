@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Navigation Logic ---
+    // --- Navigation ---
     const tabBtns = document.querySelectorAll('.tab-btn');
     const pages = document.querySelectorAll('.page');
 
@@ -13,9 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Character Selection ---
+    // --- State Management ---
+    let userInfo = JSON.parse(localStorage.getItem('kintore-user-info-v4') || '{}');
+    let workouts = JSON.parse(localStorage.getItem('kintore-workouts-v3') || '[]');
+    let customExercises = JSON.parse(localStorage.getItem('kintore-custom-ex') || '["벤치프레스", "스쿼트", "데드리프트", "오버헤드 프레스", "바벨 로우"]');
+    let routines = JSON.parse(localStorage.getItem('kintore-routines') || '[]');
+
+    // --- My Page: Character Selection ---
     const charOptions = document.querySelectorAll('.char-option');
-    let selectedChar = 'fa-user-ninja';
+    let selectedChar = userInfo.character || 'fa-user-ninja';
 
     charOptions.forEach(opt => {
         opt.addEventListener('click', () => {
@@ -25,93 +31,176 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- My Page Logic ---
+    // --- My Page: Custom Exercises ---
+    const customExInput = document.getElementById('custom-ex-input');
+    const addCustomExBtn = document.getElementById('add-custom-ex-btn');
+    const customExList = document.getElementById('custom-ex-items');
+    const exerciseDatalist = document.getElementById('exercise-suggestions');
+
+    function updateExerciseUI() {
+        customExList.innerHTML = '';
+        exerciseDatalist.innerHTML = '';
+        customExercises.forEach((ex, index) => {
+            const li = document.createElement('li');
+            li.className = 'manage-item';
+            li.innerHTML = `<span>${ex}</span> <button class="remove-btn" onclick="removeExercise(${index})"><i class="fa-solid fa-trash"></i></button>`;
+            customExList.appendChild(li);
+
+            const opt = document.createElement('option');
+            opt.value = ex;
+            exerciseDatalist.appendChild(opt);
+        });
+        localStorage.setItem('kintore-custom-ex', JSON.stringify(customExercises));
+    }
+
+    window.removeExercise = (index) => {
+        customExercises.splice(index, 1);
+        updateExerciseUI();
+    };
+
+    addCustomExBtn.addEventListener('click', () => {
+        const val = customExInput.value.trim();
+        if (val && !customExercises.includes(val)) {
+            customExercises.push(val);
+            customExInput.value = '';
+            updateExerciseUI();
+        }
+    });
+
+    // --- My Page: Routine Management ---
+    const routineInput = document.getElementById('routine-input');
+    const addRoutineBtn = document.getElementById('add-routine-btn');
+    const routineList = document.getElementById('routine-items');
+
+    function updateRoutineUI() {
+        routineList.innerHTML = '';
+        routines.forEach((r, index) => {
+            const li = document.createElement('li');
+            li.className = 'manage-item';
+            li.innerHTML = `<span>${r}</span> <button class="remove-btn" onclick="removeRoutine(${index})"><i class="fa-solid fa-trash"></i></button>`;
+            routineList.appendChild(li);
+        });
+        localStorage.setItem('kintore-routines', JSON.stringify(routines));
+        updateTodayRoutineChecklist();
+    }
+
+    window.removeRoutine = (index) => {
+        routines.splice(index, 1);
+        updateRoutineUI();
+    };
+
+    addRoutineBtn.addEventListener('click', () => {
+        const val = routineInput.value.trim();
+        if (val && !routines.includes(val)) {
+            routines.push(val);
+            routineInput.value = '';
+            updateRoutineUI();
+        }
+    });
+
+    // --- Today's Routine Checklist & Stamp ---
+    const todayRoutineContainer = document.getElementById('today-routine-list');
+    const stampOverlay = document.getElementById('well-done-stamp');
+
+    function updateTodayRoutineChecklist() {
+        if (routines.length === 0) {
+            todayRoutineContainer.innerHTML = '<p class="empty-msg">마이페이지에서 오늘의 루틴을 만들어보세요!</p>';
+            return;
+        }
+
+        const today = new Date().toLocaleDateString();
+        const todaysWorkouts = workouts.filter(w => w.fullDate === today).map(w => w.name);
+        
+        todayRoutineContainer.innerHTML = '';
+        let completedCount = 0;
+
+        routines.forEach(r => {
+            const isDone = todaysWorkouts.includes(r);
+            if (isDone) completedCount++;
+
+            const chip = document.createElement('div');
+            chip.className = `routine-chip ${isDone ? 'completed' : ''}`;
+            chip.innerHTML = `${isDone ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-regular fa-circle"></i>'} ${r}`;
+            todayRoutineContainer.appendChild(chip);
+        });
+
+        // Stamp Logic
+        if (routines.length > 0 && completedCount === routines.length) {
+            stampOverlay.classList.add('active');
+        } else {
+            stampOverlay.classList.remove('active');
+        }
+    }
+
+    // --- User Info ---
     const userForm = document.getElementById('user-info-form');
     const displayNickname = document.getElementById('display-nickname');
     const displayWeightHeader = document.getElementById('display-weight');
     const headerAvatar = document.getElementById('header-avatar');
-    const rankName = document.getElementById('rank-my-name');
-    const rankScore = document.getElementById('rank-my-score');
-    
-    const fields = ['nickname', 'age', 'height', 'weight', 'goal-weight'];
     
     function loadUserInfo() {
-        const userInfo = JSON.parse(localStorage.getItem('kintore-user-info-v3') || '{}');
-        
-        // Populate fields
+        const fields = ['nickname', 'age', 'height', 'weight', 'goal-weight'];
         fields.forEach(f => {
             const input = document.getElementById(`user-${f}`);
             if (userInfo[f]) input.value = userInfo[f];
         });
 
-        // Gender
         if (userInfo.gender) {
-            const genderRadio = document.querySelector(`input[name="gender"][value="${userInfo.gender}"]`);
-            if (genderRadio) genderRadio.checked = true;
+            const radio = document.querySelector(`input[name="gender"][value="${userInfo.gender}"]`);
+            if (radio) radio.checked = true;
         }
 
-        // Character
         if (userInfo.character) {
-            selectedChar = userInfo.character;
             charOptions.forEach(opt => {
                 opt.classList.remove('selected');
-                if (opt.dataset.char === selectedChar) opt.classList.add('selected');
+                if (opt.dataset.char === userInfo.character) opt.classList.add('selected');
             });
         }
 
-        updateUI(userInfo);
+        updateTopProfile();
+        calculateStats();
+        updateRecommendations(userInfo.weight);
     }
 
-    function updateUI(info) {
-        displayNickname.textContent = info.nickname ? `${info.nickname}님` : '반가워요!';
-        displayWeightHeader.textContent = info.weight || '0.0';
-        headerAvatar.innerHTML = `<i class="fa-solid ${info.character || 'fa-user-ninja'}"></i>`;
+    function updateTopProfile() {
+        displayNickname.textContent = userInfo.nickname ? `${userInfo.nickname}님` : '반가워요!';
+        displayWeightHeader.textContent = userInfo.weight || '0.0';
+        headerAvatar.innerHTML = `<i class="fa-solid ${userInfo.character || 'fa-user-ninja'}"></i>`;
         
-        // Ranking Update
-        if (info.nickname) rankName.textContent = info.nickname;
+        const rankName = document.getElementById('rank-my-name');
+        if (userInfo.nickname) rankName.textContent = userInfo.nickname;
         
-        // Points simulation (based on workout count)
-        const workouts = JSON.parse(localStorage.getItem('kintore-workouts-v2') || '[]');
         const points = (workouts.length * 150) + 1200;
-        rankScore.textContent = `${points.toLocaleString()} pts`;
-
-        calculateStats(info);
-        updateRecommendations(info.weight);
-    }
-
-    function calculateStats(info) {
-        const bmiEl = document.getElementById('user-bmi');
-        const goalEl = document.getElementById('weight-to-goal');
-
-        if (info.height && info.weight) {
-            const heightM = info.height / 100;
-            const bmi = (info.weight / (heightM * heightM)).toFixed(1);
-            bmiEl.textContent = bmi;
-        } else {
-            bmiEl.textContent = '-';
-        }
-
-        if (info.weight && info['goal-weight']) {
-            const diff = (info.weight - info['goal-weight']).toFixed(1);
-            goalEl.textContent = diff > 0 ? `${diff}kg` : `${Math.abs(diff)}kg`;
-        } else {
-            goalEl.textContent = '-';
-        }
+        document.getElementById('rank-my-score').textContent = `${points.toLocaleString()} pts`;
     }
 
     userForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const userInfo = {};
-        fields.forEach(f => {
-            userInfo[f] = document.getElementById(`user-${f}`).value;
-        });
+        const fields = ['nickname', 'age', 'height', 'weight', 'goal-weight'];
+        fields.forEach(f => userInfo[f] = document.getElementById(`user-${f}`).value);
         userInfo.gender = document.querySelector('input[name="gender"]:checked').value;
         userInfo.character = selectedChar;
 
-        localStorage.setItem('kintore-user-info-v3', JSON.stringify(userInfo));
-        updateUI(userInfo);
+        localStorage.setItem('kintore-user-info-v4', JSON.stringify(userInfo));
+        updateTopProfile();
+        calculateStats();
+        updateRecommendations(userInfo.weight);
         alert('프로필이 저장되었습니다!');
     });
+
+    function calculateStats() {
+        const bmiEl = document.getElementById('user-bmi');
+        const goalEl = document.getElementById('weight-to-goal');
+
+        if (userInfo.height && userInfo.weight) {
+            const h = userInfo.height / 100;
+            bmiEl.textContent = (userInfo.weight / (h * h)).toFixed(1);
+        }
+        if (userInfo.weight && userInfo['goal-weight']) {
+            const diff = (userInfo.weight - userInfo['goal-weight']).toFixed(1);
+            goalEl.textContent = diff > 0 ? `${diff}kg` : `${Math.abs(diff)}kg`;
+        }
+    }
 
     // --- Workout Logic ---
     const bpValue = document.getElementById('bp-weight');
@@ -121,10 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const workoutList = document.getElementById('workout-list');
 
     function updateRecommendations(weight) {
-        if (!weight || weight <= 0) {
-            [bpValue, sqValue, dlValue].forEach(el => el.textContent = '0 kg');
-            return;
-        }
+        if (!weight || weight <= 0) return;
         bpValue.textContent = `${(weight * 0.7).toFixed(1)} kg`;
         sqValue.textContent = `${(weight * 1.0).toFixed(1)} kg`;
         dlValue.textContent = `${(weight * 1.2).toFixed(1)} kg`;
@@ -135,62 +221,39 @@ document.addEventListener('DOMContentLoaded', () => {
         const name = document.getElementById('exercise-name').value;
         const weight = document.getElementById('workout-weight').value;
         const reps = document.getElementById('workout-reps').value;
-        const date = new Date().toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+        const now = new Date();
+        const dateStr = now.toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+        const fullDate = now.toLocaleDateString();
 
-        addTimelineItem(name, weight, reps, date);
+        const newWorkout = { name, weight, reps, date: dateStr, fullDate };
+        workouts.unshift(newWorkout);
+        
+        addTimelineItem(newWorkout);
         workoutForm.reset();
-        saveWorkouts();
-        // Update ranking points real-time
-        const userInfo = JSON.parse(localStorage.getItem('kintore-user-info-v3') || '{}');
-        updateUI(userInfo);
+        localStorage.setItem('kintore-workouts-v3', JSON.stringify(workouts));
+        updateTodayRoutineChecklist();
+        updateTopProfile();
     });
 
-    function addTimelineItem(name, weight, reps, date) {
+    function addTimelineItem(w) {
         const li = document.createElement('li');
         li.className = 'timeline-item';
         li.innerHTML = `
             <div class="item-content">
-                <div class="item-date">${date}</div>
-                <div class="item-title">${name}</div>
-                <div class="item-stats">${weight} kg × ${reps}회</div>
+                <div class="item-date">${w.date}</div>
+                <div class="item-title">${w.name}</div>
+                <div class="item-stats">${w.weight} kg × ${w.reps}회</div>
             </div>
         `;
         workoutList.prepend(li);
     }
 
-    function saveWorkouts() {
-        const workouts = [];
-        document.querySelectorAll('.timeline-item').forEach(item => {
-            workouts.push({
-                date: item.querySelector('.item-date').textContent,
-                name: item.querySelector('.item-title').textContent,
-                stats: item.querySelector('.item-stats').textContent
-            });
-        });
-        localStorage.setItem('kintore-workouts-v2', JSON.stringify(workouts));
-    }
-
-    function loadWorkouts() {
-        const saved = localStorage.getItem('kintore-workouts-v2');
-        if (saved) {
-            JSON.parse(saved).reverse().forEach(w => addTimelineItem(w.name, '', '', w.date));
-            // Note: simple load to populate list
-            workoutList.innerHTML = '';
-            JSON.parse(saved).forEach(w => {
-                const li = document.createElement('li');
-                li.className = 'timeline-item';
-                li.innerHTML = `
-                    <div class="item-content">
-                        <div class="item-date">${w.date}</div>
-                        <div class="item-title">${w.name}</div>
-                        <div class="item-stats">${w.stats}</div>
-                    </div>
-                `;
-                workoutList.appendChild(li);
-            });
-        }
-    }
-
+    // --- Initialize ---
     loadUserInfo();
-    loadWorkouts();
+    updateExerciseUI();
+    updateRoutineUI();
+    workouts.slice().reverse().forEach(w => addTimelineItem(w));
+    workoutList.innerHTML = ''; // Clear and re-populate for correct order
+    workouts.forEach(w => addTimelineItem(w));
+    updateTodayRoutineChecklist();
 });

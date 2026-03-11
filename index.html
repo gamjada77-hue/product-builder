@@ -7,12 +7,19 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Nanum+Brush+Script&display=swap" rel="stylesheet">
     <!-- Font Awesome for better icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="diary-bg">
     <div class="container">
+        <!-- Stamp Overlay (Dynamic) -->
+        <div id="well-done-stamp" class="stamp-container">
+            <div class="stamp-circle">
+                <span>참 잘했어요</span>
+            </div>
+        </div>
+
         <!-- Navigation Tabs -->
         <nav class="nav-tabs">
             <button class="tab-btn active" data-target="workout-page">
@@ -43,6 +50,15 @@
                 </div>
             </header>
 
+            <!-- Daily Routine Checklist -->
+            <section class="routine-checklist-section">
+                <h2 class="section-title"><i class="fa-solid fa-clipboard-check"></i> 오늘의 운동 계획</h2>
+                <div id="today-routine-list" class="routine-check-grid">
+                    <!-- Dynamic Checklist -->
+                    <p class="empty-msg">마이페이지에서 오늘의 루틴을 만들어보세요!</p>
+                </div>
+            </section>
+
             <section class="recommendations">
                 <h2 class="section-title"><i class="fa-solid fa-dumbbell"></i> 오늘의 권장 무게</h2>
                 <div class="cards-grid">
@@ -72,11 +88,7 @@
                             <label>종목명</label>
                             <input type="text" id="exercise-name" placeholder="예: 벤치프레스" list="exercise-suggestions" required>
                             <datalist id="exercise-suggestions">
-                                <option value="벤치프레스">
-                                <option value="스쿼트">
-                                <option value="데드리프트">
-                                <option value="오버헤드 프레스">
-                                <option value="바벨 로우">
+                                <!-- Dynamic Options -->
                             </datalist>
                         </div>
                         <div class="input-wrapper">
@@ -173,6 +185,35 @@
                     <button type="submit" class="save-user-btn">정보 저장하기</button>
                 </form>
             </section>
+
+            <!-- Routine & My Exercises Section -->
+            <div class="mypage-management-grid">
+                <section class="management-card">
+                    <h2 class="section-title"><i class="fa-solid fa-list-check"></i> 나의 운동 루틴 설정</h2>
+                    <div class="routine-builder">
+                        <div class="builder-input">
+                            <input type="text" id="routine-input" placeholder="계획할 종목 (예: 스쿼트)" list="exercise-suggestions">
+                            <button id="add-routine-btn"><i class="fa-solid fa-plus"></i> 추가</button>
+                        </div>
+                        <ul id="routine-items" class="manage-list">
+                            <!-- Dynamic Routine Items -->
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="management-card">
+                    <h2 class="section-title"><i class="fa-solid fa-folder-plus"></i> 종목 관리</h2>
+                    <div class="exercise-manager">
+                        <div class="builder-input">
+                            <input type="text" id="custom-ex-input" placeholder="새 종목 추가">
+                            <button id="add-custom-ex-btn"><i class="fa-solid fa-plus"></i> 추가</button>
+                        </div>
+                        <ul id="custom-ex-items" class="manage-list">
+                            <!-- Dynamic Exercise Items -->
+                        </ul>
+                    </div>
+                </section>
+            </div>
 
             <div class="mypage-footer-grid">
                 <section class="stats-overview">
