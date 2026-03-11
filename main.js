@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Navigation ---
+    // --- State & Navigation ---
     const tabBtns = document.querySelectorAll('.tab-btn');
     const pages = document.querySelectorAll('.page');
+    let currentDate = new Date();
 
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -10,250 +11,246 @@ document.addEventListener('DOMContentLoaded', () => {
             pages.forEach(p => p.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById(target).classList.add('active');
+            if (target === 'mypage') renderCalendar();
         });
     });
 
-    // --- State Management ---
-    let userInfo = JSON.parse(localStorage.getItem('kintore-user-info-v4') || '{}');
-    let workouts = JSON.parse(localStorage.getItem('kintore-workouts-v3') || '[]');
-    let customExercises = JSON.parse(localStorage.getItem('kintore-custom-ex') || '["벤치프레스", "스쿼트", "데드리프트", "오버헤드 프레스", "바벨 로우"]');
-    let routines = JSON.parse(localStorage.getItem('kintore-routines') || '[]');
+    let userInfo = JSON.parse(localStorage.getItem('kintore-user-info-v5') || '{}');
+    let workouts = JSON.parse(localStorage.getItem('kintore-workouts-v5') || '[]');
+    let routines = JSON.parse(localStorage.getItem('kintore-routines-v5') || '[]');
+    let plans = JSON.parse(localStorage.getItem('kintore-plans-v5') || '{}');
+    let customEx = JSON.parse(localStorage.getItem('kintore-custom-ex-v5') || '["벤치프레스", "스쿼트", "데드리프트"]');
 
-    // --- My Page: Character Selection ---
-    const charOptions = document.querySelectorAll('.char-option');
-    let selectedChar = userInfo.character || 'fa-user-ninja';
+    // --- Calendar Logic ---
+    const calendarGrid = document.getElementById('calendar-grid');
+    const currentMonthDisplay = document.getElementById('current-month-display');
+    const planModal = document.getElementById('plan-modal');
+    const selectedDateDisplay = document.getElementById('selected-date-display');
+    let activePlanDate = '';
 
-    charOptions.forEach(opt => {
-        opt.addEventListener('click', () => {
-            charOptions.forEach(o => o.classList.remove('selected'));
-            opt.classList.add('selected');
-            selectedChar = opt.dataset.char;
-        });
-    });
+    function renderCalendar() {
+        calendarGrid.innerHTML = '';
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        currentMonthDisplay.textContent = `${year}년 ${month + 1}월`;
 
-    // --- My Page: Custom Exercises ---
-    const customExInput = document.getElementById('custom-ex-input');
-    const addCustomExBtn = document.getElementById('add-custom-ex-btn');
-    const customExList = document.getElementById('custom-ex-items');
-    const exerciseDatalist = document.getElementById('exercise-suggestions');
+        const firstDay = new Date(year, month, 1).getDay();
+        const lastDate = new Date(year, month + 1, 0).getDate();
 
-    function updateExerciseUI() {
-        customExList.innerHTML = '';
-        exerciseDatalist.innerHTML = '';
-        customExercises.forEach((ex, index) => {
+        // Empty slots for previous month
+        for (let i = 0; i < firstDay; i++) {
+            const div = document.createElement('div');
+            div.className = 'calendar-day empty';
+            calendarGrid.appendChild(div);
+        }
+
+        // Days of current month
+        for (let d = 1; d <= lastDate; d++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            const isSunday = new Date(year, month, d).getDay() === 0;
+            const isToday = new Date().toLocaleDateString() === new Date(year, month, d).toLocaleDateString();
+
+            const dayDiv = document.createElement('div');
+            dayDiv.className = `calendar-day ${isSunday ? 'sunday' : ''} ${isToday ? 'today' : ''}`;
+            dayDiv.innerHTML = `<span class="day-num">${d}</span><div class="day-content"></div>`;
+            
+            // Add Plan indicators
+            const dayContent = dayDiv.querySelector('.day-content');
+            if (plans[dateStr] && plans[dateStr].length > 0) {
+                const dot = document.createElement('div');
+                dot.className = 'plan-dot';
+                dayContent.appendChild(dot);
+                plans[dateStr].forEach(p => {
+                    const tag = document.createElement('span');
+                    tag.className = 'plan-tag';
+                    tag.textContent = `${p.name} ${p.weight}kg`;
+                    dayContent.appendChild(tag);
+                });
+            }
+
+            // Add Stamp if completed
+            const isCompleted = workouts.some(w => w.fullDate === new Date(year, month, d).toLocaleDateString());
+            if (isCompleted && plans[dateStr]) {
+                const stamp = document.createElement('div');
+                stamp.className = 'day-stamp';
+                stamp.textContent = '완료';
+                dayDiv.appendChild(stamp);
+            }
+
+            dayDiv.onclick = () => openPlanModal(dateStr);
+            calendarGrid.appendChild(dayDiv);
+        }
+    }
+
+    function openPlanModal(date) {
+        activePlanDate = date;
+        selectedDateDisplay.textContent = date;
+        renderDayPlanList();
+        planModal.style.display = 'block';
+    }
+
+    function renderDayPlanList() {
+        const list = document.getElementById('day-plan-list');
+        list.innerHTML = '';
+        const dayPlans = plans[activePlanDate] || [];
+        dayPlans.forEach((p, idx) => {
             const li = document.createElement('li');
             li.className = 'manage-item';
-            li.innerHTML = `<span>${ex}</span> <button class="remove-btn" onclick="removeExercise(${index})"><i class="fa-solid fa-trash"></i></button>`;
-            customExList.appendChild(li);
-
-            const opt = document.createElement('option');
-            opt.value = ex;
-            exerciseDatalist.appendChild(opt);
+            li.innerHTML = `<span>${p.name} - ${p.weight}kg</span> <button class="remove-btn" onclick="removePlan(${idx})">&times;</button>`;
+            list.appendChild(li);
         });
-        localStorage.setItem('kintore-custom-ex', JSON.stringify(customExercises));
     }
 
-    window.removeExercise = (index) => {
-        customExercises.splice(index, 1);
-        updateExerciseUI();
+    window.removePlan = (idx) => {
+        plans[activePlanDate].splice(idx, 1);
+        localStorage.setItem('kintore-plans-v5', JSON.stringify(plans));
+        renderDayPlanList();
+        renderCalendar();
     };
 
-    addCustomExBtn.addEventListener('click', () => {
-        const val = customExInput.value.trim();
-        if (val && !customExercises.includes(val)) {
-            customExercises.push(val);
-            customExInput.value = '';
-            updateExerciseUI();
+    document.getElementById('add-plan-btn').onclick = () => {
+        const name = document.getElementById('plan-exercise').value.trim();
+        const weight = document.getElementById('plan-weight').value;
+        if (name && weight) {
+            if (!plans[activePlanDate]) plans[activePlanDate] = [];
+            plans[activePlanDate].push({ name, weight });
+            localStorage.setItem('kintore-plans-v5', JSON.stringify(plans));
+            renderDayPlanList();
+            renderCalendar();
+            document.getElementById('plan-exercise').value = '';
+            document.getElementById('plan-weight').value = '';
         }
-    });
-
-    // --- My Page: Routine Management ---
-    const routineInput = document.getElementById('routine-input');
-    const addRoutineBtn = document.getElementById('add-routine-btn');
-    const routineList = document.getElementById('routine-items');
-
-    function updateRoutineUI() {
-        routineList.innerHTML = '';
-        routines.forEach((r, index) => {
-            const li = document.createElement('li');
-            li.className = 'manage-item';
-            li.innerHTML = `<span>${r}</span> <button class="remove-btn" onclick="removeRoutine(${index})"><i class="fa-solid fa-trash"></i></button>`;
-            routineList.appendChild(li);
-        });
-        localStorage.setItem('kintore-routines', JSON.stringify(routines));
-        updateTodayRoutineChecklist();
-    }
-
-    window.removeRoutine = (index) => {
-        routines.splice(index, 1);
-        updateRoutineUI();
     };
 
-    addRoutineBtn.addEventListener('click', () => {
-        const val = routineInput.value.trim();
-        if (val && !routines.includes(val)) {
-            routines.push(val);
-            routineInput.value = '';
-            updateRoutineUI();
-        }
-    });
+    document.querySelector('.close-modal').onclick = () => planModal.style.display = 'none';
+    document.getElementById('prev-month').onclick = () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); };
+    document.getElementById('next-month').onclick = () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); };
 
-    // --- Today's Routine Checklist & Stamp ---
-    const todayRoutineContainer = document.getElementById('today-routine-list');
-    const stampOverlay = document.getElementById('well-done-stamp');
-
-    function updateTodayRoutineChecklist() {
-        if (routines.length === 0) {
-            todayRoutineContainer.innerHTML = '<p class="empty-msg">마이페이지에서 오늘의 루틴을 만들어보세요!</p>';
-            return;
-        }
-
-        const today = new Date().toLocaleDateString();
-        const todaysWorkouts = workouts.filter(w => w.fullDate === today).map(w => w.name);
-        
-        todayRoutineContainer.innerHTML = '';
-        let completedCount = 0;
-
-        routines.forEach(r => {
-            const isDone = todaysWorkouts.includes(r);
-            if (isDone) completedCount++;
-
-            const chip = document.createElement('div');
-            chip.className = `routine-chip ${isDone ? 'completed' : ''}`;
-            chip.innerHTML = `${isDone ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-regular fa-circle"></i>'} ${r}`;
-            todayRoutineContainer.appendChild(chip);
-        });
-
-        // Stamp Logic
-        if (routines.length > 0 && completedCount === routines.length) {
-            stampOverlay.classList.add('active');
-        } else {
-            stampOverlay.classList.remove('active');
-        }
-    }
-
-    // --- User Info ---
-    const userForm = document.getElementById('user-info-form');
-    const displayNickname = document.getElementById('display-nickname');
-    const displayWeightHeader = document.getElementById('display-weight');
-    const headerAvatar = document.getElementById('header-avatar');
-    
-    function loadUserInfo() {
-        const fields = ['nickname', 'age', 'height', 'weight', 'goal-weight'];
-        fields.forEach(f => {
-            const input = document.getElementById(`user-${f}`);
-            if (userInfo[f]) input.value = userInfo[f];
-        });
-
-        if (userInfo.gender) {
-            const radio = document.querySelector(`input[name="gender"][value="${userInfo.gender}"]`);
-            if (radio) radio.checked = true;
-        }
-
-        if (userInfo.character) {
-            charOptions.forEach(opt => {
-                opt.classList.remove('selected');
-                if (opt.dataset.char === userInfo.character) opt.classList.add('selected');
-            });
-        }
-
-        updateTopProfile();
-        calculateStats();
-        updateRecommendations(userInfo.weight);
-    }
-
-    function updateTopProfile() {
-        displayNickname.textContent = userInfo.nickname ? `${userInfo.nickname}님` : '반가워요!';
-        displayWeightHeader.textContent = userInfo.weight || '0.0';
-        headerAvatar.innerHTML = `<i class="fa-solid ${userInfo.character || 'fa-user-ninja'}"></i>`;
-        
-        const rankName = document.getElementById('rank-my-name');
-        if (userInfo.nickname) rankName.textContent = userInfo.nickname;
-        
-        const points = (workouts.length * 150) + 1200;
-        document.getElementById('rank-my-score').textContent = `${points.toLocaleString()} pts`;
-    }
-
-    userForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const fields = ['nickname', 'age', 'height', 'weight', 'goal-weight'];
-        fields.forEach(f => userInfo[f] = document.getElementById(`user-${f}`).value);
-        userInfo.gender = document.querySelector('input[name="gender"]:checked').value;
-        userInfo.character = selectedChar;
-
-        localStorage.setItem('kintore-user-info-v4', JSON.stringify(userInfo));
-        updateTopProfile();
-        calculateStats();
-        updateRecommendations(userInfo.weight);
-        alert('프로필이 저장되었습니다!');
-    });
-
-    function calculateStats() {
-        const bmiEl = document.getElementById('user-bmi');
-        const goalEl = document.getElementById('weight-to-goal');
-
-        if (userInfo.height && userInfo.weight) {
-            const h = userInfo.height / 100;
-            bmiEl.textContent = (userInfo.weight / (h * h)).toFixed(1);
-        }
-        if (userInfo.weight && userInfo['goal-weight']) {
-            const diff = (userInfo.weight - userInfo['goal-weight']).toFixed(1);
-            goalEl.textContent = diff > 0 ? `${diff}kg` : `${Math.abs(diff)}kg`;
-        }
-    }
-
-    // --- Workout Logic ---
-    const bpValue = document.getElementById('bp-weight');
-    const sqValue = document.getElementById('sq-weight');
-    const dlValue = document.getElementById('dl-weight');
+    // --- Workout & Routine Logic ---
     const workoutForm = document.getElementById('workout-form');
     const workoutList = document.getElementById('workout-list');
+    const routineContainer = document.getElementById('today-routine-list');
+    const bigStamp = document.getElementById('well-done-stamp');
 
-    function updateRecommendations(weight) {
-        if (!weight || weight <= 0) return;
-        bpValue.textContent = `${(weight * 0.7).toFixed(1)} kg`;
-        sqValue.textContent = `${(weight * 1.0).toFixed(1)} kg`;
-        dlValue.textContent = `${(weight * 1.2).toFixed(1)} kg`;
-    }
-
-    workoutForm.addEventListener('submit', (e) => {
+    workoutForm.onsubmit = (e) => {
         e.preventDefault();
         const name = document.getElementById('exercise-name').value;
         const weight = document.getElementById('workout-weight').value;
         const reps = document.getElementById('workout-reps').value;
         const now = new Date();
-        const dateStr = now.toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
         const fullDate = now.toLocaleDateString();
 
-        const newWorkout = { name, weight, reps, date: dateStr, fullDate };
-        workouts.unshift(newWorkout);
+        const workout = { name, weight, reps, date: now.toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }), fullDate };
+        workouts.unshift(workout);
+        localStorage.setItem('kintore-workouts-v5', JSON.stringify(workouts));
         
-        addTimelineItem(newWorkout);
+        renderWorkoutList();
+        updateRoutineChecklist();
         workoutForm.reset();
-        localStorage.setItem('kintore-workouts-v3', JSON.stringify(workouts));
-        updateTodayRoutineChecklist();
-        updateTopProfile();
-    });
+        if (pages[1].classList.contains('active')) renderCalendar();
+    };
 
-    function addTimelineItem(w) {
-        const li = document.createElement('li');
-        li.className = 'timeline-item';
-        li.innerHTML = `
-            <div class="item-content">
-                <div class="item-date">${w.date}</div>
-                <div class="item-title">${w.name}</div>
-                <div class="item-stats">${w.weight} kg × ${w.reps}회</div>
-            </div>
-        `;
-        workoutList.prepend(li);
+    function renderWorkoutList() {
+        workoutList.innerHTML = '';
+        workouts.forEach(w => {
+            const li = document.createElement('li');
+            li.className = 'timeline-item';
+            li.innerHTML = `<div class="item-content"><span class="item-date">${w.date}</span><span class="item-title">${w.name}</span><span class="item-stats">${w.weight}kg × ${w.reps}회</span></div>`;
+            workoutList.appendChild(li);
+        });
     }
 
-    // --- Initialize ---
+    function updateRoutineChecklist() {
+        const today = new Date().toLocaleDateString();
+        const todayWorkouts = workouts.filter(w => w.fullDate === today).map(w => w.name);
+        routineContainer.innerHTML = '';
+        let doneCount = 0;
+
+        if (routines.length === 0) {
+            routineContainer.innerHTML = '<p class="empty-msg">마이페이지에서 루틴을 설정하세요.</p>';
+            return;
+        }
+
+        routines.forEach(r => {
+            const isDone = todayWorkouts.includes(r);
+            if (isDone) doneCount++;
+            const chip = document.createElement('div');
+            chip.className = `routine-chip ${isDone ? 'completed' : ''}`;
+            chip.innerHTML = `${isDone ? '<i class="fa-solid fa-check"></i>' : ''} ${r}`;
+            routineContainer.appendChild(chip);
+        });
+
+        if (doneCount > 0 && doneCount === routines.length) {
+            bigStamp.classList.add('active');
+            setTimeout(() => bigStamp.classList.remove('active'), 3000);
+        }
+    }
+
+    // --- My Page Profile & Management ---
+    const userForm = document.getElementById('user-info-form');
+    function loadUserInfo() {
+        const fields = ['nickname', 'height', 'weight'];
+        fields.forEach(f => { if(userInfo[f]) document.getElementById(`user-${f}`).value = userInfo[f]; });
+        updateProfileDisplay();
+    }
+
+    function updateProfileDisplay() {
+        document.getElementById('display-nickname').textContent = userInfo.nickname || '반가워요!';
+        document.getElementById('display-weight').textContent = userInfo.weight || '0.0';
+        updateRecommendations(userInfo.weight);
+    }
+
+    userForm.onsubmit = (e) => {
+        e.preventDefault();
+        userInfo.nickname = document.getElementById('user-nickname').value;
+        userInfo.height = document.getElementById('user-height').value;
+        userInfo.weight = document.getElementById('user-weight').value;
+        localStorage.setItem('kintore-user-info-v5', JSON.stringify(userInfo));
+        updateProfileDisplay();
+        alert('저장되었습니다.');
+    };
+
+    function updateRecommendations(w) {
+        if (!w) return;
+        document.getElementById('bp-weight').textContent = `${(w * 0.7).toFixed(1)}kg`;
+        document.getElementById('sq-weight').textContent = `${(w * 1.0).toFixed(1)}kg`;
+        document.getElementById('dl-weight').textContent = `${(w * 1.2).toFixed(1)}kg`;
+    }
+
+    // --- Routine & Exercise Management ---
+    const routineInput = document.getElementById('routine-input');
+    const customExInput = document.getElementById('custom-ex-input');
+    const exerciseDatalist = document.getElementById('exercise-suggestions');
+
+    function renderManageLists() {
+        const rList = document.getElementById('routine-items');
+        const eList = document.getElementById('custom-ex-items');
+        rList.innerHTML = ''; eList.innerHTML = ''; exerciseDatalist.innerHTML = '';
+
+        routines.forEach((r, i) => {
+            const li = document.createElement('li'); li.className='manage-item';
+            li.innerHTML=`<span>${r}</span><button onclick="removeR(${i})">&times;</button>`;
+            rList.appendChild(li);
+        });
+        customEx.forEach((e, i) => {
+            const li = document.createElement('li'); li.className='manage-item';
+            li.innerHTML=`<span>${e}</span><button onclick="removeE(${i})">&times;</button>`;
+            eList.appendChild(li);
+            const opt = document.createElement('option'); opt.value = e; exerciseDatalist.appendChild(opt);
+        });
+        localStorage.setItem('kintore-routines-v5', JSON.stringify(routines));
+        localStorage.setItem('kintore-custom-ex-v5', JSON.stringify(customEx));
+        updateRoutineChecklist();
+    }
+
+    window.removeR = (i) => { routines.splice(i, 1); renderManageLists(); };
+    window.removeE = (i) => { customEx.splice(i, 1); renderManageLists(); };
+    document.getElementById('add-routine-btn').onclick = () => { if(routineInput.value) { routines.push(routineInput.value); routineInput.value=''; renderManageLists(); } };
+    document.getElementById('add-custom-ex-btn').onclick = () => { if(customExInput.value) { customEx.push(customExInput.value); customExInput.value=''; renderManageLists(); } };
+
+    // --- Init ---
     loadUserInfo();
-    updateExerciseUI();
-    updateRoutineUI();
-    workouts.slice().reverse().forEach(w => addTimelineItem(w));
-    workoutList.innerHTML = ''; // Clear and re-populate for correct order
-    workouts.forEach(w => addTimelineItem(w));
-    updateTodayRoutineChecklist();
+    renderWorkoutList();
+    renderManageLists();
+    renderCalendar();
 });
