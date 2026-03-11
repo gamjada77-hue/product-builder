@@ -7,26 +7,26 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Nanum+Brush+Script&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700&family=Nanum+Brush+Script&display=swap" rel="stylesheet">
     <!-- Font Awesome for better icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="diary-bg">
     <div class="container">
-        <!-- Stamp Overlay (Daily Routine) -->
+        <!-- Stamp Overlay (Daily Routine Success) -->
         <div id="well-done-stamp" class="stamp-container">
             <div class="stamp-circle">
                 <span>참 잘했어요</span>
             </div>
         </div>
 
-        <!-- Navigation Tabs -->
+        <!-- Sophisticated Tab Navigation -->
         <nav class="nav-tabs">
             <button class="tab-btn active" data-target="workout-page">
-                <i class="fa-solid fa-pen-nib"></i> 운동 노트
+                <i class="fa-solid fa- house-chimney-window"></i> 운동 노트
             </button>
             <button class="tab-btn" data-target="mypage">
-                <i class="fa-solid fa-user"></i> 마이페이지
+                <i class="fa-solid fa-user-tie"></i> 마이페이지
             </button>
         </nav>
 
@@ -34,7 +34,6 @@
         <div id="workout-page" class="page active">
             <header class="header">
                 <div class="logo-area">
-                    <i class="fa-solid fa-book-journal-whills main-icon"></i>
                     <h1 class="logo">디지털 운동 노트 <span>Smart Workout Journal</span></h1>
                 </div>
                 <div class="profile-card mini-profile">
@@ -51,40 +50,37 @@
             </header>
 
             <section class="routine-checklist-section">
-                <h2 class="section-title"><i class="fa-solid fa-clipboard-check"></i> 오늘의 운동 계획</h2>
+                <h2 class="section-title"><i class="fa-solid fa-calendar-check"></i> 오늘의 운동 계획</h2>
                 <div id="today-routine-list" class="routine-check-grid">
-                    <p class="empty-msg">마이페이지에서 오늘의 루틴을 만들어보세요!</p>
+                    <p class="empty-msg">마이페이지에서 루틴을 설정해 보세요.</p>
                 </div>
             </section>
 
             <section class="recommendations">
-                <h2 class="section-title"><i class="fa-solid fa-dumbbell"></i> 오늘의 권장 무게</h2>
+                <h2 class="section-title"><i class="fa-solid fa-chart-simple"></i> 오늘의 권장 무게</h2>
                 <div class="cards-grid">
                     <div class="card bench">
-                        <div class="card-icon"><i class="fa-solid fa-mound"></i></div>
-                        <span class="label">벤치프레스 (0.7배)</span>
+                        <span class="label">Bench Press</span>
                         <span class="value" id="bp-weight">0 kg</span>
                     </div>
                     <div class="card squat">
-                        <div class="card-icon"><i class="fa-solid fa-person-arrow-down-to-line"></i></div>
-                        <span class="label">스쿼트 (1.0배)</span>
+                        <span class="label">Squat</span>
                         <span class="value" id="sq-weight">0 kg</span>
                     </div>
                     <div class="card deadlift">
-                        <div class="card-icon"><i class="fa-solid fa-angles-up"></i></div>
-                        <span class="label">데드리프트 (1.2배)</span>
+                        <span class="label">Deadlift</span>
                         <span class="value" id="dl-weight">0 kg</span>
                     </div>
                 </div>
             </section>
 
             <section class="workout-entry">
-                <h2 class="section-title"><i class="fa-solid fa-pen-to-square"></i> 오늘의 운동 기록</h2>
+                <h2 class="section-title"><i class="fa-solid fa-pen-nib"></i> 기록하기</h2>
                 <form id="workout-form" class="entry-form">
                     <div class="form-grid">
                         <div class="input-wrapper">
                             <label>종목명</label>
-                            <input type="text" id="exercise-name" placeholder="예: 벤치프레스" list="exercise-suggestions" required>
+                            <input type="text" id="exercise-name" placeholder="예: 스쿼트" list="exercise-suggestions" required>
                             <datalist id="exercise-suggestions"></datalist>
                         </div>
                         <div class="input-wrapper">
@@ -95,112 +91,154 @@
                             <label>횟수 (reps)</label>
                             <input type="number" id="workout-reps" placeholder="0" required>
                         </div>
-                        <button type="submit" class="save-btn">기록하기</button>
+                        <button type="submit" class="save-btn">저장</button>
                     </div>
                 </form>
             </section>
 
             <section class="timeline-section">
-                <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> 운동 기록 리스트</h2>
+                <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> 히스토리</h2>
                 <div class="notebook-area">
                     <ul id="workout-list" class="timeline"></ul>
                 </div>
             </section>
         </div>
 
-        <!-- My Page -->
+        <!-- My Page Dashboard -->
         <div id="mypage" class="page">
             <header class="header">
                 <div class="logo-area">
-                    <i class="fa-solid fa-user-gear main-icon"></i>
-                    <h1 class="logo">마이페이지 <span>My Profile Settings</span></h1>
+                    <h1 class="logo">마이페이지 <span>Account Dashboard</span></h1>
                 </div>
             </header>
 
-            <!-- ANALOG CALENDAR SECTION -->
-            <section class="calendar-section">
-                <div class="calendar-header">
-                    <h2 class="section-title"><i class="fa-solid fa-calendar-days"></i> 월간 운동 플래너</h2>
-                    <div class="calendar-controls">
-                        <button id="prev-month"><i class="fa-solid fa-chevron-left"></i></button>
-                        <span id="current-month-display">2023년 10월</span>
-                        <button id="next-month"><i class="fa-solid fa-chevron-right"></i></button>
-                    </div>
-                </div>
-                <div class="analog-calendar">
-                    <div class="calendar-weekdays">
-                        <div class="sun">SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
-                    </div>
-                    <div id="calendar-grid" class="calendar-grid">
-                        <!-- Dates generated by JS -->
-                    </div>
-                </div>
-            </section>
+            <div class="mypage-layout">
+                <!-- Left Column: Profile & Stats -->
+                <div class="mypage-col-left">
+                    <section class="user-info-section">
+                        <form id="user-info-form" class="user-form modern-card">
+                            <h3 class="card-tag">Profile</h3>
+                            <div class="user-form-grid">
+                                <div class="user-input-group full-width">
+                                    <label>닉네임</label>
+                                    <input type="text" id="user-nickname" placeholder="이름을 입력하세요">
+                                </div>
+                                <div class="user-input-group">
+                                    <label>성별</label>
+                                    <div class="gender-selection">
+                                        <label class="gender-btn"><input type="radio" name="gender" value="male" checked> <span>남성</span></label>
+                                        <label class="gender-btn"><input type="radio" name="gender" value="female"> <span>여성</span></label>
+                                    </div>
+                                </div>
+                                <div class="user-input-group">
+                                    <label>키 (cm)</label>
+                                    <input type="number" id="user-height" placeholder="0.0" step="0.1">
+                                </div>
+                                <div class="user-input-group">
+                                    <label>현재 체중 (kg)</label>
+                                    <input type="number" id="user-weight" placeholder="0.0" step="0.1">
+                                </div>
+                                <div class="user-input-group">
+                                    <label>목표 체중 (kg)</label>
+                                    <input type="number" id="user-goal-weight" placeholder="0.0" step="0.1">
+                                </div>
+                            </div>
 
-            <section class="user-info-section">
-                <form id="user-info-form" class="user-form">
-                    <h3 class="form-subtitle">기본 정보</h3>
-                    <div class="user-form-grid">
-                        <div class="user-input-group">
-                            <label><i class="fa-solid fa-id-badge"></i> 닉네임</label>
-                            <input type="text" id="user-nickname" placeholder="이름을 입력하세요">
-                        </div>
-                        <div class="user-input-group">
-                            <label><i class="fa-solid fa-venus-mars"></i> 성별</label>
-                            <div class="gender-selection">
-                                <label class="gender-btn"><input type="radio" name="gender" value="male" checked> <span>남성</span></label>
-                                <label class="gender-btn"><input type="radio" name="gender" value="female"> <span>여성</span></label>
+                            <div class="character-selection-area">
+                                <h3 class="card-tag">Avatar</h3>
+                                <div class="character-grid" id="character-selection">
+                                    <div class="char-option selected" data-char="fa-user-ninja"><i class="fa-solid fa-user-ninja"></i></div>
+                                    <div class="char-option" data-char="fa-user-astronaut"><i class="fa-solid fa-user-astronaut"></i></div>
+                                    <div class="char-option" data-char="fa-user-tie"><i class="fa-solid fa-user-tie"></i></div>
+                                    <div class="char-option" data-char="fa-user-nurse"><i class="fa-solid fa-user-nurse"></i></div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="save-user-btn">Update Profile</button>
+                        </form>
+                    </section>
+
+                    <section class="stats-overview modern-card">
+                        <h3 class="card-tag">Statistics</h3>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-label">Body Mass Index</span>
+                                <span class="stat-value" id="user-bmi">-</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-label">To Goal Weight</span>
+                                <span class="stat-value" id="weight-to-goal">-</span>
                             </div>
                         </div>
-                        <div class="user-input-group">
-                            <label><i class="fa-solid fa-arrows-up-down"></i> 키 (cm)</label>
-                            <input type="number" id="user-height" placeholder="0.0" step="0.1">
-                        </div>
-                        <div class="user-input-group">
-                            <label><i class="fa-solid fa-weight-scale"></i> 현재 체중 (kg)</label>
-                            <input type="number" id="user-weight" placeholder="0.0" step="0.1">
-                        </div>
-                    </div>
-                    <button type="submit" class="save-user-btn">정보 저장하기</button>
-                </form>
-            </section>
+                    </section>
+                </div>
 
-            <div class="mypage-management-grid">
-                <section class="management-card">
-                    <h2 class="section-title"><i class="fa-solid fa-list-check"></i> 루틴 설정</h2>
-                    <div class="routine-builder">
-                        <div class="builder-input">
-                            <input type="text" id="routine-input" placeholder="계획할 종목" list="exercise-suggestions">
-                            <button id="add-routine-btn">추가</button>
+                <!-- Right Column: Calendar & Management -->
+                <div class="mypage-col-right">
+                    <section class="calendar-section modern-card">
+                        <div class="calendar-header">
+                            <h3 class="card-tag">Monthly Planner</h3>
+                            <div class="calendar-controls">
+                                <button id="prev-month"><i class="fa-solid fa-angle-left"></i></button>
+                                <span id="current-month-display">2023.10</span>
+                                <button id="next-month"><i class="fa-solid fa-angle-right"></i></button>
+                            </div>
                         </div>
-                        <ul id="routine-items" class="manage-list"></ul>
-                    </div>
-                </section>
-                <section class="management-card">
-                    <h2 class="section-title"><i class="fa-solid fa-folder-plus"></i> 종목 관리</h2>
-                    <div class="exercise-manager">
-                        <div class="builder-input">
-                            <input type="text" id="custom-ex-input" placeholder="새 종목 추가">
-                            <button id="add-custom-ex-btn">추가</button>
+                        <div class="analog-calendar">
+                            <div class="calendar-weekdays">
+                                <div class="sun">S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+                            </div>
+                            <div id="calendar-grid" class="calendar-grid"></div>
                         </div>
-                        <ul id="custom-ex-items" class="manage-list"></ul>
+                    </section>
+
+                    <div class="management-widgets">
+                        <section class="management-card modern-card">
+                            <h3 class="card-tag">Daily Routine</h3>
+                            <div class="builder-input">
+                                <input type="text" id="routine-input" placeholder="종목 추가" list="exercise-suggestions">
+                                <button id="add-routine-btn"><i class="fa-solid fa-plus"></i></button>
+                            </div>
+                            <ul id="routine-items" class="manage-list"></ul>
+                        </section>
+
+                        <section class="management-card modern-card">
+                            <h3 class="card-tag">Leaderboard</h3>
+                            <div class="ranking-list">
+                                <div class="ranking-item">
+                                    <span class="rank-num">1</span>
+                                    <span class="rank-name">Muscle Master</span>
+                                    <span class="rank-score">12.4k</span>
+                                </div>
+                                <div class="ranking-item">
+                                    <span class="rank-num">2</span>
+                                    <span class="rank-name">Iron Lifter</span>
+                                    <span class="rank-score">9.8k</span>
+                                </div>
+                                <div class="ranking-item">
+                                    <span class="rank-num">3</span>
+                                    <span class="rank-name" id="rank-my-name">You</span>
+                                    <span class="rank-score" id="rank-my-score">1.2k</span>
+                                </div>
+                            </div>
+                        </section>
                     </div>
-                </section>
+                </div>
             </div>
         </div>
 
-        <!-- Plan Modal -->
+        <!-- Plan Modal (Sophisticated Glassmorphism style) -->
         <div id="plan-modal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3><i class="fa-solid fa-calendar-plus"></i> <span id="selected-date-display">날짜</span> 운동 계획</h3>
+                    <h3><span id="selected-date-display">Date</span> Plans</h3>
                     <button class="close-modal">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="plan-input-group">
-                        <input type="text" id="plan-exercise" placeholder="운동 종목" list="exercise-suggestions">
-                        <input type="number" id="plan-weight" placeholder="목표 무게(kg)">
-                        <button id="add-plan-btn">추가</button>
+                        <input type="text" id="plan-exercise" placeholder="Exercise" list="exercise-suggestions">
+                        <input type="number" id="plan-weight" placeholder="Goal (kg)">
+                        <button id="add-plan-btn">Add Plan</button>
                     </div>
                     <ul id="day-plan-list" class="manage-list"></ul>
                 </div>
