@@ -141,6 +141,148 @@ body { background-color: var(--bg-color); font-family: var(--font-family); color
 }
 
 /* =========================================================
+   TO-DO 스타일 루틴 체크리스트
+   ========================================================= */
+.routine-check-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 1rem;
+}
+
+.routine-todo-item {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border: 1px solid var(--line-color);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+    cursor: pointer;
+    user-select: none;
+}
+
+.routine-todo-item:not(.completed):hover {
+    border-color: var(--accent-color);
+}
+
+.routine-todo-item.completed {
+    background: #f0fdf4;
+    border-color: var(--success-color);
+    cursor: default;
+    opacity: 0.85;
+}
+
+.routine-todo-item.form-open {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Top row: check icon + name + hint */
+.routine-todo-item > div:first-child,
+.routine-todo-item .todo-check {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+}
+
+.todo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+}
+
+.todo-check {
+    font-size: 1.2rem;
+    color: #cbd5e1;
+    flex-shrink: 0;
+}
+
+.todo-check.done {
+    color: var(--success-color);
+}
+
+.todo-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.todo-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--primary-color);
+}
+
+.todo-record {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--success-color);
+}
+
+.todo-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Inline form */
+.todo-inline-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px 12px;
+    border-top: 1px solid var(--accent-light);
+    background: #f8f9ff;
+    flex-wrap: wrap;
+}
+
+.todo-weight-input,
+.todo-reps-input {
+    width: 110px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: white;
+}
+
+.todo-weight-input:focus,
+.todo-reps-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.todo-confirm-btn {
+    background: var(--success-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: 0.2s;
+}
+.todo-confirm-btn:hover { background: #059669; }
+
+.todo-cancel-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: 0.2s;
+}
+.todo-cancel-btn:hover { background: #f1f5f9; }
+
+/* =========================================================
    FEATURE 1: 주간 운동 플랜 추천
    ========================================================= */
 .weekly-plan-section {

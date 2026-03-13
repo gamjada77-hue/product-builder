@@ -158,11 +158,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    let openTodoItem = null;
+
     function updateRoutineChecklist() {
         const today = new Date().toLocaleDateString();
-        const todayWorkouts = workouts.filter(w => w.fullDate === today).map(w => w.name);
+        const todayWorkouts = workouts.filter(w => w.fullDate === today);
+        const todayNames = todayWorkouts.map(w => w.name);
         routineContainer.innerHTML = '';
         let doneCount = 0;
+        openTodoItem = null;
 
         if (routines.length === 0) {
             routineContainer.innerHTML = '<p class="empty-msg">마이페이지에서 루틴을 설정하세요.</p>';
@@ -170,18 +174,104 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         routines.forEach(r => {
-            const isDone = todayWorkouts.includes(r);
+            const lastRecord = [...todayWorkouts].reverse().find(w => w.name === r);
+            const isDone = !!lastRecord;
             if (isDone) doneCount++;
-            const chip = document.createElement('div');
-            chip.className = `routine-chip ${isDone ? 'completed' : ''}`;
-            chip.innerHTML = `${isDone ? '<i class="fa-solid fa-check"></i>' : ''} ${r}`;
-            routineContainer.appendChild(chip);
+
+            const item = document.createElement('div');
+            item.className = `routine-todo-item ${isDone ? 'completed' : ''}`;
+
+            if (isDone) {
+                item.innerHTML = `
+                    <div class="todo-row">
+                        <div class="todo-check done"><i class="fa-solid fa-circle-check"></i></div>
+                        <div class="todo-info">
+                            <span class="todo-name">${r}</span>
+                            <span class="todo-record">${lastRecord.weight}kg × ${lastRecord.reps}회</span>
+                        </div>
+                    </div>`;
+            } else {
+                item.innerHTML = `
+                    <div class="todo-row">
+                        <div class="todo-check"><i class="fa-regular fa-circle"></i></div>
+                        <div class="todo-info">
+                            <span class="todo-name">${r}</span>
+                            <span class="todo-hint">탭하여 기록</span>
+                        </div>
+                    </div>`;
+                item.addEventListener('click', () => openTodoForm(item, r));
+            }
+
+            routineContainer.appendChild(item);
         });
 
         if (doneCount > 0 && doneCount === routines.length) {
             bigStamp.classList.add('active');
             setTimeout(() => bigStamp.classList.remove('active'), 3000);
         }
+    }
+
+    function openTodoForm(item, exerciseName) {
+        // Close previously open form
+        if (openTodoItem && openTodoItem !== item) {
+            openTodoItem.querySelector('.todo-inline-form')?.remove();
+            openTodoItem.classList.remove('form-open');
+        }
+
+        // Toggle off if already open
+        if (item.querySelector('.todo-inline-form')) {
+            item.querySelector('.todo-inline-form').remove();
+            item.classList.remove('form-open');
+            openTodoItem = null;
+            return;
+        }
+
+        item.classList.add('form-open');
+        openTodoItem = item;
+
+        // Suggest last recorded weight for this exercise
+        const lastWorkout = workouts.find(w => w.name === exerciseName);
+        const suggestedWeight = lastWorkout ? lastWorkout.weight : '';
+        const suggestedReps = lastWorkout ? lastWorkout.reps : '';
+
+        const form = document.createElement('div');
+        form.className = 'todo-inline-form';
+        form.innerHTML = `
+            <input type="number" class="todo-weight-input" placeholder="무게 (kg)" value="${suggestedWeight}" step="0.5">
+            <input type="number" class="todo-reps-input" placeholder="횟수" value="${suggestedReps}">
+            <button class="todo-confirm-btn"><i class="fa-solid fa-check"></i> 완료</button>
+            <button class="todo-cancel-btn">취소</button>`;
+        item.appendChild(form);
+        form.querySelector('.todo-weight-input').focus();
+
+        form.querySelector('.todo-confirm-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const weight = form.querySelector('.todo-weight-input').value;
+            const reps = form.querySelector('.todo-reps-input').value;
+            if (!weight || !reps) { alert('무게와 횟수를 입력하세요.'); return; }
+
+            const now = new Date();
+            workouts.unshift({
+                name: exerciseName, weight, reps,
+                date: now.toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+                fullDate: now.toLocaleDateString(),
+            });
+            localStorage.setItem('kintore-workouts-v5', JSON.stringify(workouts));
+            renderWorkoutList();
+            updateRoutineChecklist();
+            renderWeeklyPlan();
+            if (pages[1].classList.contains('active')) renderCalendar();
+        });
+
+        form.querySelector('.todo-cancel-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            form.remove();
+            item.classList.remove('form-open');
+            openTodoItem = null;
+        });
+
+        // Prevent clicks inside form from bubbling to item
+        form.addEventListener('click', (e) => e.stopPropagation());
     }
 
     // --- My Page Profile & Management ---
