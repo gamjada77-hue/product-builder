@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.add('active');
             document.getElementById(target).classList.add('active');
             if (target === 'mypage') renderCalendar();
+            if (target === 'gym-page') initGymPage();
         });
     });
 
@@ -37,14 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const firstDay = new Date(year, month, 1).getDay();
         const lastDate = new Date(year, month + 1, 0).getDate();
 
-        // Empty slots for previous month
         for (let i = 0; i < firstDay; i++) {
             const div = document.createElement('div');
             div.className = 'calendar-day empty';
             calendarGrid.appendChild(div);
         }
 
-        // Days of current month
         for (let d = 1; d <= lastDate; d++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
             const isSunday = new Date(year, month, d).getDay() === 0;
@@ -53,8 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const dayDiv = document.createElement('div');
             dayDiv.className = `calendar-day ${isSunday ? 'sunday' : ''} ${isToday ? 'today' : ''}`;
             dayDiv.innerHTML = `<span class="day-num">${d}</span><div class="day-content"></div>`;
-            
-            // Add Plan indicators
+
             const dayContent = dayDiv.querySelector('.day-content');
             if (plans[dateStr] && plans[dateStr].length > 0) {
                 const dot = document.createElement('div');
@@ -68,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Add Stamp if completed
             const isCompleted = workouts.some(w => w.fullDate === new Date(year, month, d).toLocaleDateString());
             if (isCompleted && plans[dateStr]) {
                 const stamp = document.createElement('div');
@@ -143,9 +140,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const workout = { name, weight, reps, date: now.toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }), fullDate };
         workouts.unshift(workout);
         localStorage.setItem('kintore-workouts-v5', JSON.stringify(workouts));
-        
+
         renderWorkoutList();
         updateRoutineChecklist();
+        renderWeeklyPlan();
         workoutForm.reset();
         if (pages[1].classList.contains('active')) renderCalendar();
     };
@@ -190,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const userForm = document.getElementById('user-info-form');
     function loadUserInfo() {
         const fields = ['nickname', 'height', 'weight'];
-        fields.forEach(f => { if(userInfo[f]) document.getElementById(`user-${f}`).value = userInfo[f]; });
+        fields.forEach(f => { if (userInfo[f]) document.getElementById(`user-${f}`).value = userInfo[f]; });
         updateProfileDisplay();
     }
 
@@ -207,6 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
         userInfo.weight = document.getElementById('user-weight').value;
         localStorage.setItem('kintore-user-info-v5', JSON.stringify(userInfo));
         updateProfileDisplay();
+        renderWeeklyPlan();
         alert('저장되었습니다.');
     };
 
@@ -225,17 +224,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderManageLists() {
         const rList = document.getElementById('routine-items');
         const eList = document.getElementById('custom-ex-items');
-        rList.innerHTML = ''; eList.innerHTML = ''; exerciseDatalist.innerHTML = '';
+        rList.innerHTML = '';
+        if (eList) eList.innerHTML = '';
+        exerciseDatalist.innerHTML = '';
 
         routines.forEach((r, i) => {
-            const li = document.createElement('li'); li.className='manage-item';
-            li.innerHTML=`<span>${r}</span><button onclick="removeR(${i})">&times;</button>`;
+            const li = document.createElement('li'); li.className = 'manage-item';
+            li.innerHTML = `<span>${r}</span><button onclick="removeR(${i})">&times;</button>`;
             rList.appendChild(li);
         });
         customEx.forEach((e, i) => {
-            const li = document.createElement('li'); li.className='manage-item';
-            li.innerHTML=`<span>${e}</span><button onclick="removeE(${i})">&times;</button>`;
-            eList.appendChild(li);
+            if (eList) {
+                const li = document.createElement('li'); li.className = 'manage-item';
+                li.innerHTML = `<span>${e}</span><button onclick="removeE(${i})">&times;</button>`;
+                eList.appendChild(li);
+            }
             const opt = document.createElement('option'); opt.value = e; exerciseDatalist.appendChild(opt);
         });
         localStorage.setItem('kintore-routines-v5', JSON.stringify(routines));
@@ -245,12 +248,427 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.removeR = (i) => { routines.splice(i, 1); renderManageLists(); };
     window.removeE = (i) => { customEx.splice(i, 1); renderManageLists(); };
-    document.getElementById('add-routine-btn').onclick = () => { if(routineInput.value) { routines.push(routineInput.value); routineInput.value=''; renderManageLists(); } };
-    document.getElementById('add-custom-ex-btn').onclick = () => { if(customExInput.value) { customEx.push(customExInput.value); customExInput.value=''; renderManageLists(); } };
+    document.getElementById('add-routine-btn').onclick = () => { if (routineInput.value) { routines.push(routineInput.value); routineInput.value = ''; renderManageLists(); } };
+    if (customExInput) {
+        document.getElementById('add-custom-ex-btn').onclick = () => { if (customExInput.value) { customEx.push(customExInput.value); customExInput.value = ''; renderManageLists(); } };
+    }
+
+    // =========================================================
+    // FEATURE 1: 주간 운동 플랜 추천 (Algorithm-based Weekly Plan)
+    // =========================================================
+
+    const MUSCLE_GROUP_MAP = {
+        '스쿼트': 'legs', '레그프레스': 'legs', '런지': 'legs', '레그익스텐션': 'legs', '레그컬': 'legs',
+        '데드리프트': 'pull', '바벨로우': 'pull', '랫풀다운': 'pull', '시티드로우': 'pull', '풀업': 'pull', '친업': 'pull',
+        '벤치프레스': 'push', '인클라인벤치': 'push', '오버헤드프레스': 'push', '딥스': 'push', '덤벨플라이': 'push', '숄더프레스': 'push',
+    };
+
+    const EXERCISE_TEMPLATES = {
+        Push: ['벤치프레스', '인클라인벤치', '오버헤드프레스', '딥스'],
+        Pull: ['데드리프트', '바벨로우', '랫풀다운', '풀업'],
+        Legs: ['스쿼트', '레그프레스', '런지', '레그컬'],
+    };
+
+    const BASE_MULTIPLIERS = {
+        '벤치프레스': 0.7, '인클라인벤치': 0.6, '오버헤드프레스': 0.45, '딥스': 0.5,
+        '데드리프트': 1.2, '바벨로우': 0.8, '랫풀다운': 0.7, '풀업': 0.4, '친업': 0.4,
+        '스쿼트': 1.0, '레그프레스': 1.5, '런지': 0.5, '레그컬': 0.4,
+    };
+
+    function analyzeMuscleGroupCoverage(daysBack = 28) {
+        const cutoff = Date.now() - daysBack * 24 * 60 * 60 * 1000;
+        const coverage = { push: 0, pull: 0, legs: 0 };
+        workouts.forEach(w => {
+            if (new Date(w.fullDate).getTime() >= cutoff) {
+                const group = MUSCLE_GROUP_MAP[w.name];
+                if (group) coverage[group]++;
+            }
+        });
+        return coverage;
+    }
+
+    function detectProgressiveOverload(exerciseName) {
+        const now = Date.now();
+        const MS7 = 7 * 24 * 60 * 60 * 1000;
+        const MS28 = 28 * 24 * 60 * 60 * 1000;
+        const last7 = workouts.filter(w => w.name === exerciseName && (now - new Date(w.fullDate).getTime()) <= MS7);
+        const last28 = workouts.filter(w => w.name === exerciseName && (now - new Date(w.fullDate).getTime()) <= MS28);
+
+        const bodyWeight = parseFloat(userInfo.weight) || 70;
+        const baseMultiplier = BASE_MULTIPLIERS[exerciseName] || 0.5;
+
+        let baseWeight;
+        if (last28.length > 0) {
+            baseWeight = Math.max(...last28.map(w => parseFloat(w.weight) || 0));
+        } else {
+            baseWeight = Math.round(bodyWeight * baseMultiplier / 2.5) * 2.5;
+        }
+
+        let multiplier = 1.0;
+        if (last7.length >= 3) multiplier = 1.025;
+        else if (last28.length >= 9) multiplier = 1.05;
+
+        const recommended = Math.round(baseWeight * multiplier / 2.5) * 2.5;
+        const maxSafe = bodyWeight * baseMultiplier * 2.5;
+        return Math.min(Math.max(recommended, 20), maxSafe);
+    }
+
+    function assignPPLSplit(coverage) {
+        const totals = [coverage.push, coverage.pull, coverage.legs];
+        const min = Math.min(...totals);
+        let weakest = 'push';
+        if (coverage.pull === min) weakest = 'pull';
+        if (coverage.legs === min) weakest = 'legs';
+
+        const templates = {
+            push: ['Push', 'Pull', 'Legs', 'Push', 'Pull', 'Legs', 'Rest'],
+            pull: ['Pull', 'Push', 'Legs', 'Pull', 'Push', 'Legs', 'Rest'],
+            legs: ['Legs', 'Push', 'Pull', 'Legs', 'Push', 'Pull', 'Rest'],
+        };
+        return templates[weakest];
+    }
+
+    function generateWeeklyPlan() {
+        const coverage = analyzeMuscleGroupCoverage();
+        const split = assignPPLSplit(coverage);
+        const today = new Date();
+        const plan = [];
+
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(today);
+            day.setDate(today.getDate() + i);
+            const dayName = ['일', '월', '화', '수', '목', '금', '토'][day.getDay()];
+            const splitDay = split[i];
+
+            if (splitDay === 'Rest') {
+                plan.push({ day: dayName, date: `${day.getMonth() + 1}/${day.getDate()}`, type: 'Rest', exercises: [] });
+            } else {
+                const exercises = EXERCISE_TEMPLATES[splitDay].slice(0, 3).map(name => ({
+                    name,
+                    weight: detectProgressiveOverload(name),
+                }));
+                plan.push({ day: dayName, date: `${day.getMonth() + 1}/${day.getDate()}`, type: splitDay, exercises });
+            }
+        }
+        return plan;
+    }
+
+    function renderWeeklyPlan() {
+        const container = document.getElementById('weekly-plan-container');
+        if (!container) return;
+        const plan = generateWeeklyPlan();
+        const typeColors = { Push: '#4f46e5', Pull: '#0891b2', Legs: '#059669', Rest: '#94a3b8' };
+        const typeIcons = { Push: '💪', Pull: '⚡', Legs: '🏋️', Rest: '😴' };
+
+        container.innerHTML = plan.map(day => `
+            <div class="weekly-plan-card ${day.type === 'Rest' ? 'rest-day' : ''}">
+                <div class="plan-day-header">
+                    <div class="plan-day-left">
+                        <span class="plan-day-name">${day.day}</span>
+                        <span class="plan-day-date">${day.date}</span>
+                    </div>
+                    <span class="plan-day-type" style="color:${typeColors[day.type]}">${typeIcons[day.type]} ${day.type}</span>
+                </div>
+                ${day.exercises.map(ex => `
+                    <div class="plan-exercise-row">
+                        <span class="plan-ex-name">${ex.name}</span>
+                        <span class="plan-ex-weight">${ex.weight}kg</span>
+                    </div>
+                `).join('') || '<span class="plan-rest-text">오늘은 쉬어요</span>'}
+            </div>
+        `).join('');
+    }
+
+    document.getElementById('refresh-plan-btn').addEventListener('click', renderWeeklyPlan);
+
+    // =========================================================
+    // FEATURE 2: 근처 헬스장 목록 (Geolocation + Overpass API)
+    // =========================================================
+
+    let gymPageInitialized = false;
+
+    function initGymPage() {
+        if (gymPageInitialized) {
+            renderCheckInStatus();
+            return;
+        }
+        gymPageInitialized = true;
+        renderCheckInStatus();
+        document.getElementById('find-gyms-btn').addEventListener('click', findNearbyGyms);
+        document.getElementById('checkout-btn').addEventListener('click', checkOut);
+    }
+
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371000;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) ** 2 +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    async function fetchGymsFromOverpass(lat, lon) {
+        const query = `[out:json][timeout:15];(node["leisure"="fitness_centre"](around:2000,${lat},${lon});way["leisure"="fitness_centre"](around:2000,${lat},${lon}););out center;`;
+        const res = await fetch('https://overpass-api.de/api/interpreter', {
+            method: 'POST',
+            body: 'data=' + encodeURIComponent(query),
+        });
+        if (!res.ok) throw new Error(`Overpass API error: ${res.status}`);
+        const data = await res.json();
+        return data.elements
+            .filter(el => el.tags?.name)
+            .map(el => {
+                const elLat = el.lat || el.center?.lat;
+                const elLon = el.lon || el.center?.lon;
+                return {
+                    id: `${el.type}_${el.id}`,
+                    name: el.tags.name,
+                    address: el.tags['addr:full'] || el.tags['addr:street'] || '',
+                    lat: elLat,
+                    lon: elLon,
+                    distance: haversineDistance(lat, lon, elLat, elLon),
+                };
+            })
+            .sort((a, b) => a.distance - b.distance);
+    }
+
+    async function findNearbyGyms() {
+        const statusEl = document.getElementById('gym-search-status');
+        const listEl = document.getElementById('gym-list');
+
+        // Check 10-minute cache
+        const cache = JSON.parse(localStorage.getItem('kintore-gym-cache-v5') || 'null');
+        if (cache && (Date.now() - cache.timestamp) < 10 * 60 * 1000) {
+            renderGymList(cache.gyms);
+            statusEl.textContent = `${cache.gyms.length}개 (캐시)`;
+            return;
+        }
+
+        statusEl.textContent = '위치 정보를 가져오는 중...';
+        listEl.innerHTML = '';
+
+        if (!navigator.geolocation) {
+            statusEl.textContent = '이 브라우저는 위치 서비스를 지원하지 않습니다.';
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            const { latitude, longitude } = pos.coords;
+            statusEl.textContent = '주변 헬스장을 검색 중...';
+            try {
+                const gyms = await fetchGymsFromOverpass(latitude, longitude);
+                localStorage.setItem('kintore-gym-cache-v5', JSON.stringify({
+                    lat: latitude, lon: longitude, timestamp: Date.now(), gyms,
+                }));
+                renderGymList(gyms);
+                statusEl.textContent = gyms.length ? `${gyms.length}개 헬스장 발견` : '주변에 헬스장이 없습니다';
+            } catch (e) {
+                statusEl.textContent = '검색 중 오류가 발생했습니다.';
+                console.error('Overpass API error:', e);
+            }
+        }, () => {
+            statusEl.textContent = '위치 접근이 거부되었습니다.';
+        });
+    }
+
+    function renderGymList(gyms) {
+        const listEl = document.getElementById('gym-list');
+        if (!gyms.length) {
+            listEl.innerHTML = '<p class="empty-msg">주변 2km 이내 헬스장을 찾지 못했습니다.</p>';
+            return;
+        }
+        const checkin = JSON.parse(localStorage.getItem('kintore-checkin-v5') || 'null');
+        listEl.innerHTML = gyms.map(g => {
+            const isCheckedIn = checkin?.gymId === g.id;
+            const gymJson = JSON.stringify(g).replace(/'/g, "\\'");
+            return `
+            <div class="gym-list-item ${isCheckedIn ? 'checked-in' : ''}">
+                <div class="gym-info">
+                    <span class="gym-name">${g.name}</span>
+                    ${g.address ? `<span class="gym-address"><i class="fa-solid fa-map-pin"></i> ${g.address}</span>` : ''}
+                    <span class="gym-distance"><i class="fa-solid fa-route"></i> ${(g.distance / 1000).toFixed(2)} km</span>
+                </div>
+                ${isCheckedIn
+                    ? '<span class="checkin-badge"><i class="fa-solid fa-circle-check"></i> 체크인 중</span>'
+                    : `<button class="checkin-btn" onclick='window.checkInGym(${JSON.stringify(g)})'>체크인</button>`
+                }
+            </div>`;
+        }).join('');
+    }
+
+    window.checkInGym = (gym) => {
+        const checkin = { gymName: gym.name, gymId: gym.id, checkinTime: new Date().toISOString(), lat: gym.lat, lon: gym.lon };
+        localStorage.setItem('kintore-checkin-v5', JSON.stringify(checkin));
+        renderCheckInStatus();
+        const cache = JSON.parse(localStorage.getItem('kintore-gym-cache-v5') || 'null');
+        if (cache) renderGymList(cache.gyms);
+        loadGymRanking(gym.id);
+    };
+
+    function checkOut() {
+        localStorage.removeItem('kintore-checkin-v5');
+        document.getElementById('checkin-status-section').style.display = 'none';
+        document.getElementById('gym-ranking-section').style.display = 'none';
+        const cache = JSON.parse(localStorage.getItem('kintore-gym-cache-v5') || 'null');
+        if (cache) renderGymList(cache.gyms);
+    }
+
+    function renderCheckInStatus() {
+        const checkin = JSON.parse(localStorage.getItem('kintore-checkin-v5') || 'null');
+        const statusSection = document.getElementById('checkin-status-section');
+        const rankingSection = document.getElementById('gym-ranking-section');
+
+        if (!checkin) {
+            if (statusSection) statusSection.style.display = 'none';
+            if (rankingSection) rankingSection.style.display = 'none';
+            return;
+        }
+
+        if (statusSection) {
+            statusSection.style.display = 'block';
+            document.getElementById('checkin-gym-name').textContent = checkin.gymName;
+            document.getElementById('checkin-time').textContent =
+                new Date(checkin.checkinTime).toLocaleString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        if (rankingSection) {
+            rankingSection.style.display = 'block';
+            loadGymRanking(checkin.gymId);
+        }
+    }
+
+    // =========================================================
+    // FEATURE 3: 커뮤니티 헬스장 랭킹 (Firebase Firestore)
+    // =========================================================
+
+    let db = null;
+    let currentRankingExercise = 'squat';
+    let currentGymId = null;
+
+    function initFirebase() {
+        if (typeof firebase !== 'undefined' && typeof firebaseConfig !== 'undefined') {
+            try {
+                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+            } catch (e) {
+                console.warn('Firebase init failed:', e);
+            }
+        }
+    }
+
+    async function ensureGymDocument(gymId, checkinData) {
+        if (!db) return;
+        const ref = db.collection('gyms').doc(gymId);
+        const doc = await ref.get();
+        if (!doc.exists) {
+            await ref.set({
+                name: checkinData.gymName,
+                lat: checkinData.lat,
+                lon: checkinData.lon,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+        }
+    }
+
+    async function loadGymRanking(gymId) {
+        currentGymId = gymId;
+        const section = document.getElementById('gym-ranking-section');
+        if (!section) return;
+        section.style.display = 'block';
+
+        const listEl = document.getElementById('ranking-list');
+
+        if (!db) {
+            listEl.innerHTML = '<p class="empty-msg"><i class="fa-solid fa-circle-info"></i> Firebase 설정이 필요합니다.<br>firebase-config.js를 추가하면 커뮤니티 랭킹을 사용할 수 있어요.</p>';
+            return;
+        }
+
+        listEl.innerHTML = '<p class="empty-msg">로딩 중...</p>';
+        try {
+            const ref = db.collection('gyms').doc(gymId).collection('leaderboard').doc(currentRankingExercise);
+            const doc = await ref.get();
+            const entries = doc.exists ? (doc.data().entries || []) : [];
+            renderGymRanking(entries, currentRankingExercise);
+        } catch (e) {
+            listEl.innerHTML = '<p class="empty-msg">랭킹 로드 중 오류가 발생했습니다.</p>';
+            console.error('Ranking load error:', e);
+        }
+    }
+
+    function renderGymRanking(entries, exercise) {
+        const listEl = document.getElementById('ranking-list');
+        const badges = { squat: '스쿼트 짱', deadlift: '데드리프트 짱', bench: '벤치프레스 짱' };
+        const sorted = [...entries].sort((a, b) => b.weight - a.weight).slice(0, 10);
+
+        if (!sorted.length) {
+            listEl.innerHTML = '<p class="empty-msg">아직 기록이 없습니다. 첫 번째로 등록해보세요! 🏆</p>';
+            return;
+        }
+
+        listEl.innerHTML = sorted.map((entry, i) => `
+            <div class="ranking-row ${i === 0 ? 'rank-first' : ''}">
+                <span class="rank-position">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</span>
+                <span class="rank-nickname">
+                    ${entry.nickname}
+                    ${i === 0 ? `<span class="rank-badge">${badges[exercise]}</span>` : ''}
+                </span>
+                <span class="rank-weight">${entry.weight}kg</span>
+            </div>
+        `).join('');
+    }
+
+    async function submitBestLift(gymId, exercise, weight, nickname) {
+        if (!db) {
+            alert('Firebase 설정이 필요합니다. firebase-config.js를 추가해 주세요.');
+            return;
+        }
+
+        const checkin = JSON.parse(localStorage.getItem('kintore-checkin-v5') || 'null');
+        if (checkin) await ensureGymDocument(gymId, checkin);
+
+        const ref = db.collection('gyms').doc(gymId).collection('leaderboard').doc(exercise);
+        const badgeMap = { squat: '스쿼트 짱', deadlift: '데드리프트 짱', bench: '벤치프레스 짱' };
+
+        await db.runTransaction(async (transaction) => {
+            const doc = await transaction.get(ref);
+            let entries = doc.exists ? (doc.data().entries || []) : [];
+
+            // Replace existing entry for same nickname
+            entries = entries.filter(e => e.nickname !== nickname);
+            entries.push({ nickname, weight: parseFloat(weight), submittedAt: new Date().toISOString() });
+            entries.sort((a, b) => b.weight - a.weight);
+            if (entries.length > 20) entries = entries.slice(0, 20);
+
+            // Assign badge to top entry
+            entries = entries.map((e, i) => ({ ...e, badge: i === 0 ? badgeMap[exercise] : '' }));
+            transaction.set(ref, { entries });
+        });
+
+        await loadGymRanking(gymId);
+    }
+
+    window.switchRankingTab = (exercise) => {
+        currentRankingExercise = exercise;
+        document.querySelectorAll('.ranking-tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`.ranking-tab-btn[data-exercise="${exercise}"]`).classList.add('active');
+        if (currentGymId) loadGymRanking(currentGymId);
+    };
+
+    window.submitRankingForm = () => {
+        const nickname = document.getElementById('ranking-nickname').value.trim();
+        const weight = document.getElementById('ranking-weight').value;
+        if (!nickname || !weight) { alert('닉네임과 무게를 입력해주세요.'); return; }
+        if (!currentGymId) { alert('먼저 헬스장에 체크인해주세요.'); return; }
+        submitBestLift(currentGymId, currentRankingExercise, parseFloat(weight), nickname);
+        document.getElementById('ranking-nickname').value = '';
+        document.getElementById('ranking-weight').value = '';
+    };
 
     // --- Init ---
+    initFirebase();
     loadUserInfo();
     renderWorkoutList();
     renderManageLists();
     renderCalendar();
+    renderWeeklyPlan();
 });

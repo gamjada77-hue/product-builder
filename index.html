@@ -8,8 +8,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700&family=Nanum+Brush+Script&display=swap" rel="stylesheet">
-    <!-- Font Awesome for better icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK (community ranking feature) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- Create this file from Firebase console to enable community ranking -->
+    <script src="firebase-config.js" onerror="console.info('firebase-config.js not found - community ranking disabled')"></script>
 </head>
 <body class="diary-bg">
     <div class="container">
@@ -20,13 +24,16 @@
             </div>
         </div>
 
-        <!-- Sophisticated Tab Navigation -->
+        <!-- Tab Navigation -->
         <nav class="nav-tabs">
             <button class="tab-btn active" data-target="workout-page">
-                <i class="fa-solid fa- house-chimney-window"></i> 운동 노트
+                <i class="fa-solid fa-house-chimney-window"></i> 운동 노트
             </button>
             <button class="tab-btn" data-target="mypage">
                 <i class="fa-solid fa-user-tie"></i> 마이페이지
+            </button>
+            <button class="tab-btn" data-target="gym-page">
+                <i class="fa-solid fa-dumbbell"></i> 헬스장
             </button>
         </nav>
 
@@ -54,6 +61,17 @@
                 <div id="today-routine-list" class="routine-check-grid">
                     <p class="empty-msg">마이페이지에서 루틴을 설정해 보세요.</p>
                 </div>
+            </section>
+
+            <!-- Weekly Plan Recommendation -->
+            <section class="weekly-plan-section">
+                <div class="weekly-plan-header">
+                    <h2 class="section-title"><i class="fa-solid fa-calendar-days"></i> 이번 주 추천 플랜</h2>
+                    <button id="refresh-plan-btn" class="refresh-plan-btn" title="새로고침">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+                <div id="weekly-plan-container" class="weekly-plan-grid"></div>
             </section>
 
             <section class="recommendations">
@@ -203,31 +221,73 @@
                         </section>
 
                         <section class="management-card modern-card">
-                            <h3 class="card-tag">Leaderboard</h3>
-                            <div class="ranking-list">
-                                <div class="ranking-item">
-                                    <span class="rank-num">1</span>
-                                    <span class="rank-name">Muscle Master</span>
-                                    <span class="rank-score">12.4k</span>
-                                </div>
-                                <div class="ranking-item">
-                                    <span class="rank-num">2</span>
-                                    <span class="rank-name">Iron Lifter</span>
-                                    <span class="rank-score">9.8k</span>
-                                </div>
-                                <div class="ranking-item">
-                                    <span class="rank-num">3</span>
-                                    <span class="rank-name" id="rank-my-name">You</span>
-                                    <span class="rank-score" id="rank-my-score">1.2k</span>
-                                </div>
+                            <h3 class="card-tag">Custom Exercises</h3>
+                            <div class="builder-input">
+                                <input type="text" id="custom-ex-input" placeholder="종목 추가">
+                                <button id="add-custom-ex-btn"><i class="fa-solid fa-plus"></i></button>
                             </div>
+                            <ul id="custom-ex-items" class="manage-list"></ul>
                         </section>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Plan Modal (Sophisticated Glassmorphism style) -->
+        <!-- Gym Page -->
+        <div id="gym-page" class="page">
+            <header class="header">
+                <div class="logo-area">
+                    <h1 class="logo">헬스장 <span>Gym Finder & Community</span></h1>
+                </div>
+            </header>
+
+            <!-- Section 1: Nearby Gym Search -->
+            <section class="gym-search-section">
+                <h2 class="section-title"><i class="fa-solid fa-location-dot"></i> 주변 헬스장</h2>
+                <div class="gym-search-controls">
+                    <button id="find-gyms-btn" class="find-gyms-btn">
+                        <i class="fa-solid fa-magnifying-glass"></i> 주변 헬스장 검색 (2km)
+                    </button>
+                    <span id="gym-search-status" class="gym-search-status"></span>
+                </div>
+                <div id="gym-list" class="gym-list"></div>
+            </section>
+
+            <!-- Section 2: Current Check-in Status -->
+            <section id="checkin-status-section" class="checkin-status-section" style="display:none">
+                <h2 class="section-title"><i class="fa-solid fa-circle-check"></i> 현재 체크인</h2>
+                <div class="checkin-card">
+                    <div class="checkin-info">
+                        <span class="checkin-gym-name" id="checkin-gym-name"></span>
+                        <span class="checkin-time-label">체크인 시간: <strong id="checkin-time"></strong></span>
+                    </div>
+                    <button id="checkout-btn" class="checkout-btn">
+                        <i class="fa-solid fa-right-from-bracket"></i> 체크아웃
+                    </button>
+                </div>
+            </section>
+
+            <!-- Section 3: Community Gym Ranking -->
+            <section id="gym-ranking-section" class="gym-ranking-section" style="display:none">
+                <h2 class="section-title"><i class="fa-solid fa-trophy"></i> 이 헬스장 커뮤니티 랭킹</h2>
+                <div class="ranking-tabs">
+                    <button class="ranking-tab-btn active" data-exercise="squat" onclick="switchRankingTab('squat')">🏋️ 스쿼트</button>
+                    <button class="ranking-tab-btn" data-exercise="deadlift" onclick="switchRankingTab('deadlift')">⚡ 데드리프트</button>
+                    <button class="ranking-tab-btn" data-exercise="bench" onclick="switchRankingTab('bench')">💪 벤치프레스</button>
+                </div>
+                <div id="ranking-list" class="ranking-list-container"></div>
+                <div class="ranking-submit-form">
+                    <h3 class="submit-form-title"><i class="fa-solid fa-pen"></i> 내 최고 기록 등록</h3>
+                    <div class="ranking-form-row">
+                        <input type="text" id="ranking-nickname" placeholder="닉네임" class="ranking-input">
+                        <input type="number" id="ranking-weight" placeholder="최고 무게 (kg)" class="ranking-input" step="0.5">
+                        <button onclick="submitRankingForm()" class="submit-ranking-btn">등록</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Plan Modal -->
         <div id="plan-modal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
