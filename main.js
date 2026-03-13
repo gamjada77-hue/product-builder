@@ -754,7 +754,76 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('ranking-weight').value = '';
     };
 
+    // =========================================================
+    // SAMPLE DATA: 첫 실행 시 데모용 샘플 데이터 로드
+    // =========================================================
+
+    function initSampleData() {
+        if (localStorage.getItem('kintore-sample-loaded-v5')) return;
+        if (workouts.length > 0) return;
+
+        // 유저 정보
+        userInfo = {
+            nickname: '운동왕', gender: 'male',
+            height: 175, weight: 75, goalWeight: 70,
+            character: 'fa-user-ninja'
+        };
+        localStorage.setItem('kintore-user-info-v5', JSON.stringify(userInfo));
+
+        // 28일치 운동 기록 (Push 11회, Pull 9회, Legs 4회 → Legs-first 스플릿)
+        const now = Date.now();
+        const day = 86400000;
+        const sampleWorkouts = [
+            { daysAgo: 27, name: '벤치프레스', weight: 60, reps: 8 },
+            { daysAgo: 26, name: '데드리프트', weight: 80, reps: 5 },
+            { daysAgo: 25, name: '스쿼트', weight: 70, reps: 8 },
+            { daysAgo: 24, name: '오버헤드프레스', weight: 40, reps: 10 },
+            { daysAgo: 22, name: '바벨로우', weight: 55, reps: 8 },
+            { daysAgo: 21, name: '벤치프레스', weight: 62.5, reps: 8 },
+            { daysAgo: 20, name: '데드리프트', weight: 82.5, reps: 5 },
+            { daysAgo: 18, name: '인클라인벤치', weight: 50, reps: 10 },
+            { daysAgo: 17, name: '풀업', weight: 0, reps: 8 },
+            { daysAgo: 16, name: '오버헤드프레스', weight: 42.5, reps: 8 },
+            { daysAgo: 15, name: '데드리프트', weight: 85, reps: 5 },
+            { daysAgo: 14, name: '스쿼트', weight: 72.5, reps: 8 },
+            { daysAgo: 13, name: '벤치프레스', weight: 65, reps: 8 },
+            { daysAgo: 11, name: '바벨로우', weight: 57.5, reps: 8 },
+            { daysAgo: 10, name: '딥스', weight: 0, reps: 12 },
+            { daysAgo: 9,  name: '데드리프트', weight: 87.5, reps: 5 },
+            { daysAgo: 8,  name: '스쿼트', weight: 75, reps: 8 },
+            { daysAgo: 7,  name: '벤치프레스', weight: 67.5, reps: 8 },
+            { daysAgo: 6,  name: '오버헤드프레스', weight: 45, reps: 8 },
+            { daysAgo: 5,  name: '데드리프트', weight: 90, reps: 5 },
+            { daysAgo: 4,  name: '레그프레스', weight: 100, reps: 12 },
+            { daysAgo: 3,  name: '벤치프레스', weight: 70, reps: 6 },
+            { daysAgo: 2,  name: '풀업', weight: 0, reps: 10 },
+            { daysAgo: 1,  name: '벤치프레스', weight: 70, reps: 8 },
+        ];
+
+        workouts = sampleWorkouts.map(s => {
+            const ts = now - s.daysAgo * day;
+            const d = new Date(ts);
+            return {
+                id: `sample-${ts}`,
+                name: s.name,
+                weight: s.weight,
+                reps: s.reps,
+                date: `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`,
+                fullDate: d.toLocaleDateString(),
+                timestamp: ts,
+            };
+        });
+        localStorage.setItem('kintore-workouts-v5', JSON.stringify(workouts));
+
+        // 루틴 설정
+        routines = ['스쿼트', '벤치프레스', '데드리프트'];
+        localStorage.setItem('kintore-routines-v5', JSON.stringify(routines));
+
+        localStorage.setItem('kintore-sample-loaded-v5', '1');
+    }
+
     // --- Init ---
+    initSampleData();
     initFirebase();
     loadUserInfo();
     renderWorkoutList();
