@@ -423,7 +423,87 @@ body {
 }
 .todo-cancel-btn:hover { background: var(--surface-2); }
 
-/* ── Weekly Plan ─────────────────────────────────────── */
+/* ── Today's Plan ────────────────────────────────────── */
+.today-plan-container { }
+
+.today-plan-card {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    border: 2px solid var(--accent);
+    box-shadow: 0 4px 20px var(--accent-glow);
+}
+.today-plan-card.rest-day {
+    border-color: var(--border);
+    box-shadow: var(--shadow-sm);
+}
+
+.today-plan-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid var(--border-light);
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.today-plan-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.today-plan-date {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+.today-plan-type {
+    font-size: 13px;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 50px;
+}
+.today-plan-goal {
+    font-size: 11px;
+    font-weight: 800;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 4px 12px;
+    border-radius: 50px;
+    letter-spacing: 0.3px;
+}
+
+.today-plan-exercises {
+    padding: 14px 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.today-ex-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--surface-2);
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border-light);
+}
+.today-ex-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+}
+.today-ex-weight {
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 4px 12px;
+    border-radius: 50px;
+}
+
+/* ── Weekly Plan (kept for potential reuse) ──────────── */
 .weekly-plan-section { }
 
 .weekly-plan-header {

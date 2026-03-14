@@ -156,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function renderWorkoutList() {
+        if (!workoutList) return;
         workoutList.innerHTML = '';
         workouts.forEach(w => {
             const li = document.createElement('li');
@@ -527,29 +528,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('weekly-plan-container');
         if (!container) return;
         const plan = generateWeeklyPlan();
+        const today = plan[0];
         const typeColors = { Push: '#4f46e5', Pull: '#0891b2', Legs: '#059669', Rest: '#94a3b8', Upper: '#7c3aed', Lower: '#d97706', Full: '#dc2626' };
         const typeIcons  = { Push: '💪', Pull: '⚡', Legs: '🏋️', Rest: '😴', Upper: '👆', Lower: '👇', Full: '🎯' };
         const goalLabels = { hypertrophy: '근비대', strength: '근력', diet: '다이어트', health: '건강유지' };
         const goalLabel  = goalLabels[userInfo.goal] || '';
+        const typeColor  = typeColors[today.type] || '#94a3b8';
 
-        container.innerHTML = plan.map((day, idx) => `
-            <div class="weekly-plan-card ${day.type === 'Rest' ? 'rest-day' : ''} ${idx === 0 ? 'today-card' : ''}">
-                <div class="plan-day-header">
-                    <div class="plan-day-left">
-                        <span class="plan-day-name">${day.day}</span>
-                        <span class="plan-day-date">${day.date}</span>
+        container.innerHTML = `
+            <div class="today-plan-card ${today.type === 'Rest' ? 'rest-day' : ''}">
+                <div class="today-plan-top">
+                    <div class="today-plan-meta">
+                        <span class="today-plan-date">${today.date}</span>
+                        <span class="today-plan-type" style="color:${typeColor}; background:${typeColor}18;">
+                            ${typeIcons[today.type] || ''} ${today.type}
+                        </span>
                     </div>
-                    <span class="plan-day-type" style="color:${typeColors[day.type] || '#94a3b8'}">${typeIcons[day.type] || ''} ${day.type}</span>
+                    ${goalLabel ? `<span class="today-plan-goal">${goalLabel}</span>` : ''}
                 </div>
-                ${day.exercises.map(ex => `
-                    <div class="plan-exercise-row">
-                        <span class="plan-ex-name">${escapeHtml(ex.name)}</span>
-                        <span class="plan-ex-weight">${ex.weight}kg</span>
-                    </div>
-                `).join('') || '<span class="plan-rest-text">😴 오늘은 쉬어요</span>'}
-                ${idx === 0 && goalLabel ? `<div class="plan-goal-tag">${goalLabel}</div>` : ''}
-            </div>
-        `).join('');
+                <div class="today-plan-exercises">
+                    ${today.exercises.length ? today.exercises.map(ex => `
+                        <div class="today-ex-row">
+                            <span class="today-ex-name">${escapeHtml(ex.name)}</span>
+                            <span class="today-ex-weight">${ex.weight}kg</span>
+                        </div>
+                    `).join('') : '<span class="plan-rest-text">😴 오늘은 휴식일이에요</span>'}
+                </div>
+            </div>`;
     }
 
     document.getElementById('refresh-plan-btn').addEventListener('click', renderWeeklyPlan);
