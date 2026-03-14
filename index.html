@@ -2,80 +2,86 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>디지털 운동 노트 - Workout Diary</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700&family=Nanum+Brush+Script&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Brush+Script&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase SDK (community ranking feature) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <!-- Create this file from Firebase console to enable community ranking -->
     <script src="firebase-config.js" onerror="console.info('firebase-config.js not found - community ranking disabled')"></script>
 </head>
-<body class="diary-bg">
-    <div class="container">
-        <!-- Stamp Overlay (Daily Routine Success) -->
-        <div id="well-done-stamp" class="stamp-container">
-            <div class="stamp-circle">
-                <span>참 잘했어요</span>
-            </div>
+<body>
+    <!-- Stamp Overlay -->
+    <div id="well-done-stamp" class="stamp-container">
+        <div class="stamp-circle">
+            <span>참 잘했어요</span>
         </div>
+    </div>
 
-        <!-- Tab Navigation -->
-        <nav class="nav-tabs">
-            <button class="tab-btn active" data-target="workout-page">
-                <i class="fa-solid fa-house-chimney-window"></i> 운동 노트
-            </button>
-            <button class="tab-btn" data-target="mypage">
-                <i class="fa-solid fa-user-tie"></i> 마이페이지
-            </button>
-            <button class="tab-btn" data-target="gym-page">
-                <i class="fa-solid fa-dumbbell"></i> 헬스장
-            </button>
-        </nav>
+    <div class="app-shell">
 
-        <!-- Workout Note Page -->
+        <!-- ══════════════════════════════════════════
+             TAB 1: 운동 노트
+        ══════════════════════════════════════════ -->
         <div id="workout-page" class="page active">
-            <header class="header">
-                <div class="logo-area">
-                    <h1 class="logo">디지털 운동 노트 <span>Smart Workout Journal</span></h1>
-                </div>
-                <div class="profile-card mini-profile">
-                    <div class="mini-avatar" id="header-avatar">
+
+            <!-- Hero Header -->
+            <div class="page-hero">
+                <div class="hero-top">
+                    <div class="hero-logo">
+                        FitNote
+                        <small>Smart Workout Journal</small>
+                    </div>
+                    <div class="hero-avatar" id="header-avatar">
                         <i class="fa-solid fa-user-ninja"></i>
                     </div>
-                    <div class="mini-info">
-                        <span id="display-nickname">반가워요!</span>
-                        <div class="mini-weight">
-                            <span id="display-weight">0.0</span> kg
-                        </div>
+                </div>
+                <div class="hero-greeting">
+                    <div class="hero-name" id="display-nickname">반가워요! 👋</div>
+                    <div class="hero-sub">오늘도 함께 운동해요</div>
+                    <div class="hero-weight-pill">
+                        <i class="fa-solid fa-weight-scale"></i>
+                        <span id="display-weight">0.0</span> kg
                     </div>
                 </div>
-            </header>
+            </div>
 
-            <section class="routine-checklist-section">
-                <h2 class="section-title"><i class="fa-solid fa-calendar-check"></i> 오늘의 운동 계획</h2>
+            <!-- 오늘의 루틴 -->
+            <div class="section">
+                <div class="section-head">
+                    <h2 class="section-title">
+                        <i class="fa-solid fa-calendar-check"></i> 오늘의 운동 계획
+                    </h2>
+                </div>
                 <div id="today-routine-list" class="routine-check-grid">
                     <p class="empty-msg">마이페이지에서 루틴을 설정해 보세요.</p>
                 </div>
-            </section>
+            </div>
 
-            <!-- Weekly Plan Recommendation -->
-            <section class="weekly-plan-section">
+            <!-- 이번 주 추천 플랜 -->
+            <div class="section">
                 <div class="weekly-plan-header">
-                    <h2 class="section-title"><i class="fa-solid fa-calendar-days"></i> 이번 주 추천 플랜</h2>
+                    <h2 class="section-title">
+                        <i class="fa-solid fa-calendar-days"></i> 이번 주 추천 플랜
+                    </h2>
                     <button id="refresh-plan-btn" class="refresh-plan-btn" title="새로고침">
                         <i class="fa-solid fa-rotate-right"></i>
                     </button>
                 </div>
                 <div id="weekly-plan-container" class="weekly-plan-grid"></div>
-            </section>
+            </div>
 
-            <section class="recommendations">
-                <h2 class="section-title"><i class="fa-solid fa-chart-simple"></i> 오늘의 권장 무게</h2>
+            <!-- 오늘의 권장 무게 -->
+            <div class="section">
+                <div class="section-head">
+                    <h2 class="section-title">
+                        <i class="fa-solid fa-chart-simple"></i> 오늘의 권장 무게
+                    </h2>
+                </div>
                 <div class="cards-grid">
                     <div class="card bench">
                         <span class="label">Bench Press</span>
@@ -90,13 +96,18 @@
                         <span class="value" id="dl-weight">0 kg</span>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            <section class="workout-entry">
-                <h2 class="section-title"><i class="fa-solid fa-pen-nib"></i> 기록하기</h2>
+            <!-- 기록하기 -->
+            <div class="workout-entry">
+                <div class="section-head" style="padding: 0; margin-bottom: 14px;">
+                    <h2 class="section-title">
+                        <i class="fa-solid fa-pen-nib"></i> 기록하기
+                    </h2>
+                </div>
                 <form id="workout-form" class="entry-form">
                     <div class="form-grid">
-                        <div class="input-wrapper">
+                        <div class="input-wrapper" style="grid-column: span 2;">
                             <label>종목명</label>
                             <input type="text" id="exercise-name" placeholder="예: 스쿼트" list="exercise-suggestions" required>
                             <datalist id="exercise-suggestions"></datalist>
@@ -109,119 +120,146 @@
                             <label>횟수 (reps)</label>
                             <input type="number" id="workout-reps" placeholder="0" required>
                         </div>
-                        <button type="submit" class="save-btn">저장</button>
+                        <button type="submit" class="save-btn">
+                            <i class="fa-solid fa-floppy-disk"></i> 저장
+                        </button>
                     </div>
                 </form>
-            </section>
+            </div>
 
-            <section class="timeline-section">
-                <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> 히스토리</h2>
+            <!-- 히스토리 -->
+            <div class="timeline-section">
+                <div class="section-head">
+                    <h2 class="section-title">
+                        <i class="fa-solid fa-clock-rotate-left"></i> 히스토리
+                    </h2>
+                </div>
                 <div class="notebook-area">
                     <ul id="workout-list" class="timeline"></ul>
                 </div>
-            </section>
+            </div>
+
+            <div class="section-spacer"></div>
         </div>
 
-        <!-- My Page Dashboard -->
+
+        <!-- ══════════════════════════════════════════
+             TAB 2: 마이페이지
+        ══════════════════════════════════════════ -->
         <div id="mypage" class="page">
-            <header class="header">
-                <div class="logo-area">
-                    <h1 class="logo">마이페이지 <span>Account Dashboard</span></h1>
-                </div>
-            </header>
+
+            <div class="mypage-hero">
+                <div class="mypage-hero-title">마이페이지</div>
+                <div class="mypage-hero-sub">Account Dashboard</div>
+            </div>
 
             <div class="mypage-layout">
-                <!-- Left Column: Profile & Stats -->
-                <div class="mypage-col-left">
-                    <section class="user-info-section">
-                        <form id="user-info-form" class="user-form modern-card">
-                            <h3 class="card-tag">Profile</h3>
-                            <div class="user-form-grid">
-                                <div class="user-input-group full-width">
-                                    <label>닉네임</label>
-                                    <input type="text" id="user-nickname" placeholder="이름을 입력하세요">
-                                </div>
-                                <div class="user-input-group">
-                                    <label>성별</label>
-                                    <div class="gender-selection">
-                                        <label class="gender-btn"><input type="radio" name="gender" value="male" checked> <span>남성</span></label>
-                                        <label class="gender-btn"><input type="radio" name="gender" value="female"> <span>여성</span></label>
+
+                <!-- Profile Card -->
+                <div style="margin-top: 16px;">
+                    <div class="modern-card">
+                        <div class="modern-card-inner">
+                            <div class="card-tag">Profile</div>
+                            <form id="user-info-form" class="user-form">
+                                <div class="user-form-grid">
+                                    <div class="user-input-group full-width">
+                                        <label>닉네임</label>
+                                        <input type="text" id="user-nickname" placeholder="이름을 입력하세요">
                                     </div>
-                                </div>
-                                <div class="user-input-group">
-                                    <label>키 (cm)</label>
-                                    <input type="number" id="user-height" placeholder="0.0" step="0.1">
-                                </div>
-                                <div class="user-input-group">
-                                    <label>현재 체중 (kg)</label>
-                                    <input type="number" id="user-weight" placeholder="0.0" step="0.1">
-                                </div>
-                                <div class="user-input-group">
-                                    <label>목표 체중 (kg)</label>
-                                    <input type="number" id="user-goal-weight" placeholder="0.0" step="0.1">
-                                </div>
-                            </div>
-
-                            <div class="character-selection-area">
-                                <h3 class="card-tag">Avatar</h3>
-                                <div class="character-grid" id="character-selection">
-                                    <div class="char-option selected" data-char="fa-user-ninja"><i class="fa-solid fa-user-ninja"></i></div>
-                                    <div class="char-option" data-char="fa-user-astronaut"><i class="fa-solid fa-user-astronaut"></i></div>
-                                    <div class="char-option" data-char="fa-user-tie"><i class="fa-solid fa-user-tie"></i></div>
-                                    <div class="char-option" data-char="fa-user-nurse"><i class="fa-solid fa-user-nurse"></i></div>
-                                </div>
-                            </div>
-
-                            <!-- Training Settings -->
-                            <div class="training-settings-area">
-                                <h3 class="card-tag">Training Settings</h3>
-
-                                <div class="setting-group">
-                                    <span class="setting-label">🎯 운동 목표</span>
-                                    <div class="setting-options">
-                                        <label class="setting-option"><input type="radio" name="workout-goal" value="hypertrophy" checked><span class="opt-icon">💪</span><span class="opt-text">근비대</span></label>
-                                        <label class="setting-option"><input type="radio" name="workout-goal" value="strength"><span class="opt-icon">⚡</span><span class="opt-text">근력</span></label>
-                                        <label class="setting-option"><input type="radio" name="workout-goal" value="diet"><span class="opt-icon">🔥</span><span class="opt-text">다이어트</span></label>
-                                        <label class="setting-option"><input type="radio" name="workout-goal" value="health"><span class="opt-icon">❤️</span><span class="opt-text">건강유지</span></label>
+                                    <div class="user-input-group full-width">
+                                        <label>성별</label>
+                                        <div class="gender-selection">
+                                            <label class="gender-btn">
+                                                <input type="radio" name="gender" value="male" checked>
+                                                <i class="fa-solid fa-mars"></i> <span>남성</span>
+                                            </label>
+                                            <label class="gender-btn">
+                                                <input type="radio" name="gender" value="female">
+                                                <i class="fa-solid fa-venus"></i> <span>여성</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="user-input-group">
+                                        <label>키 (cm)</label>
+                                        <input type="number" id="user-height" placeholder="0.0" step="0.1">
+                                    </div>
+                                    <div class="user-input-group">
+                                        <label>현재 체중 (kg)</label>
+                                        <input type="number" id="user-weight" placeholder="0.0" step="0.1">
+                                    </div>
+                                    <div class="user-input-group full-width">
+                                        <label>목표 체중 (kg)</label>
+                                        <input type="number" id="user-goal-weight" placeholder="0.0" step="0.1">
                                     </div>
                                 </div>
 
-                                <div class="setting-group">
-                                    <span class="setting-label">📅 주간 운동 빈도</span>
-                                    <div class="setting-options">
-                                        <label class="setting-option"><input type="radio" name="workout-freq" value="3"><span class="opt-text">3일</span></label>
-                                        <label class="setting-option"><input type="radio" name="workout-freq" value="4" checked><span class="opt-text">4일</span></label>
-                                        <label class="setting-option"><input type="radio" name="workout-freq" value="5"><span class="opt-text">5일</span></label>
-                                        <label class="setting-option"><input type="radio" name="workout-freq" value="6"><span class="opt-text">6일</span></label>
+                                <!-- Avatar -->
+                                <div class="character-selection-area">
+                                    <div class="card-tag" style="margin-top: 20px;">Avatar</div>
+                                    <div class="character-grid" id="character-selection">
+                                        <div class="char-option selected" data-char="fa-user-ninja"><i class="fa-solid fa-user-ninja"></i></div>
+                                        <div class="char-option" data-char="fa-user-astronaut"><i class="fa-solid fa-user-astronaut"></i></div>
+                                        <div class="char-option" data-char="fa-user-tie"><i class="fa-solid fa-user-tie"></i></div>
+                                        <div class="char-option" data-char="fa-user-nurse"><i class="fa-solid fa-user-nurse"></i></div>
                                     </div>
                                 </div>
 
-                                <div class="setting-group">
-                                    <span class="setting-label">🌱 운동 경력</span>
-                                    <div class="setting-options">
-                                        <label class="setting-option"><input type="radio" name="workout-exp" value="beginner" checked><span class="opt-icon">🌱</span><span class="opt-text">초보</span></label>
-                                        <label class="setting-option"><input type="radio" name="workout-exp" value="intermediate"><span class="opt-icon">🌿</span><span class="opt-text">중급</span></label>
-                                        <label class="setting-option"><input type="radio" name="workout-exp" value="advanced"><span class="opt-icon">🌳</span><span class="opt-text">고급</span></label>
+                                <!-- Training Settings -->
+                                <div class="training-settings-area">
+                                    <div class="card-tag" style="margin-bottom: 16px;">Training Settings</div>
+
+                                    <div class="setting-group">
+                                        <span class="setting-label">🎯 운동 목표</span>
+                                        <div class="setting-options">
+                                            <label class="setting-option"><input type="radio" name="workout-goal" value="hypertrophy" checked><span class="opt-icon">💪</span><span class="opt-text">근비대</span></label>
+                                            <label class="setting-option"><input type="radio" name="workout-goal" value="strength"><span class="opt-icon">⚡</span><span class="opt-text">근력</span></label>
+                                            <label class="setting-option"><input type="radio" name="workout-goal" value="diet"><span class="opt-icon">🔥</span><span class="opt-text">다이어트</span></label>
+                                            <label class="setting-option"><input type="radio" name="workout-goal" value="health"><span class="opt-icon">❤️</span><span class="opt-text">건강유지</span></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="setting-group">
+                                        <span class="setting-label">📅 주간 운동 빈도</span>
+                                        <div class="setting-options">
+                                            <label class="setting-option"><input type="radio" name="workout-freq" value="3"><span class="opt-text">3일</span></label>
+                                            <label class="setting-option"><input type="radio" name="workout-freq" value="4" checked><span class="opt-text">4일</span></label>
+                                            <label class="setting-option"><input type="radio" name="workout-freq" value="5"><span class="opt-text">5일</span></label>
+                                            <label class="setting-option"><input type="radio" name="workout-freq" value="6"><span class="opt-text">6일</span></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="setting-group">
+                                        <span class="setting-label">🌱 운동 경력</span>
+                                        <div class="setting-options">
+                                            <label class="setting-option"><input type="radio" name="workout-exp" value="beginner" checked><span class="opt-icon">🌱</span><span class="opt-text">초보</span></label>
+                                            <label class="setting-option"><input type="radio" name="workout-exp" value="intermediate"><span class="opt-icon">🌿</span><span class="opt-text">중급</span></label>
+                                            <label class="setting-option"><input type="radio" name="workout-exp" value="advanced"><span class="opt-icon">🌳</span><span class="opt-text">고급</span></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="setting-group">
+                                        <span class="setting-label">🔄 분할 방식</span>
+                                        <div class="setting-options">
+                                            <label class="setting-option"><input type="radio" name="workout-split" value="auto" checked><span class="opt-icon">🤖</span><span class="opt-text">자동</span></label>
+                                            <label class="setting-option"><input type="radio" name="workout-split" value="ppl"><span class="opt-icon">🔄</span><span class="opt-text">PPL</span></label>
+                                            <label class="setting-option"><input type="radio" name="workout-split" value="upper-lower"><span class="opt-icon">↕️</span><span class="opt-text">상하체</span></label>
+                                            <label class="setting-option"><input type="radio" name="workout-split" value="full"><span class="opt-icon">🎯</span><span class="opt-text">전신</span></label>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="setting-group">
-                                    <span class="setting-label">🔄 분할 방식</span>
-                                    <div class="setting-options">
-                                        <label class="setting-option"><input type="radio" name="workout-split" value="auto" checked><span class="opt-icon">🤖</span><span class="opt-text">자동</span></label>
-                                        <label class="setting-option"><input type="radio" name="workout-split" value="ppl"><span class="opt-icon">🔄</span><span class="opt-text">PPL</span></label>
-                                        <label class="setting-option"><input type="radio" name="workout-split" value="upper-lower"><span class="opt-icon">↕️</span><span class="opt-text">상하체</span></label>
-                                        <label class="setting-option"><input type="radio" name="workout-split" value="full"><span class="opt-icon">🎯</span><span class="opt-text">전신</span></label>
-                                    </div>
-                                </div>
-                            </div>
+                                <button type="submit" class="save-user-btn">
+                                    <i class="fa-solid fa-floppy-disk"></i> 설정 저장
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
 
-                            <button type="submit" class="save-user-btn">설정 저장</button>
-                        </form>
-                    </section>
-
-                    <section class="stats-overview modern-card">
-                        <h3 class="card-tag">Statistics</h3>
+                <!-- Stats Card -->
+                <div class="modern-card stats-overview">
+                    <div class="modern-card-inner">
+                        <div class="card-tag">Statistics</div>
                         <div class="stats-grid">
                             <div class="stat-card">
                                 <span class="stat-label">Body Mass Index</span>
@@ -232,61 +270,69 @@
                                 <span class="stat-value" id="weight-to-goal">-</span>
                             </div>
                         </div>
-                    </section>
-                </div>
-
-                <!-- Right Column: Calendar & Management -->
-                <div class="mypage-col-right">
-                    <section class="calendar-section modern-card">
-                        <div class="calendar-header">
-                            <h3 class="card-tag">Monthly Planner</h3>
-                            <div class="calendar-controls">
-                                <button id="prev-month"><i class="fa-solid fa-angle-left"></i></button>
-                                <span id="current-month-display">2023.10</span>
-                                <button id="next-month"><i class="fa-solid fa-angle-right"></i></button>
-                            </div>
-                        </div>
-                        <div class="analog-calendar">
-                            <div class="calendar-weekdays">
-                                <div class="sun">S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
-                            </div>
-                            <div id="calendar-grid" class="calendar-grid"></div>
-                        </div>
-                    </section>
-
-                    <div class="management-widgets">
-                        <section class="management-card modern-card">
-                            <h3 class="card-tag">Daily Routine</h3>
-                            <div class="builder-input">
-                                <input type="text" id="routine-input" placeholder="종목 추가" list="exercise-suggestions">
-                                <button id="add-routine-btn"><i class="fa-solid fa-plus"></i></button>
-                            </div>
-                            <ul id="routine-items" class="manage-list"></ul>
-                        </section>
-
-                        <section class="management-card modern-card">
-                            <h3 class="card-tag">Custom Exercises</h3>
-                            <div class="builder-input">
-                                <input type="text" id="custom-ex-input" placeholder="종목 추가">
-                                <button id="add-custom-ex-btn"><i class="fa-solid fa-plus"></i></button>
-                            </div>
-                            <ul id="custom-ex-items" class="manage-list"></ul>
-                        </section>
                     </div>
                 </div>
+
+                <!-- Calendar Card -->
+                <div class="calendar-section modern-card">
+                    <div class="calendar-header">
+                        <div class="card-tag" style="margin-bottom: 0;">Monthly Planner</div>
+                        <div class="calendar-controls">
+                            <button id="prev-month"><i class="fa-solid fa-angle-left"></i></button>
+                            <span id="current-month-display">2023.10</span>
+                            <button id="next-month"><i class="fa-solid fa-angle-right"></i></button>
+                        </div>
+                    </div>
+                    <div class="analog-calendar">
+                        <div class="calendar-weekdays">
+                            <div class="sun">S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+                        </div>
+                        <div id="calendar-grid" class="calendar-grid"></div>
+                    </div>
+                </div>
+
+                <!-- Routine Builder -->
+                <div class="modern-card management-card">
+                    <div class="modern-card-inner">
+                        <div class="card-tag">Daily Routine</div>
+                        <div class="builder-input">
+                            <input type="text" id="routine-input" placeholder="종목 추가" list="exercise-suggestions">
+                            <button id="add-routine-btn"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <ul id="routine-items" class="manage-list"></ul>
+                    </div>
+                </div>
+
+                <!-- Custom Exercises -->
+                <div class="modern-card management-card">
+                    <div class="modern-card-inner">
+                        <div class="card-tag">Custom Exercises</div>
+                        <div class="builder-input">
+                            <input type="text" id="custom-ex-input" placeholder="종목 추가">
+                            <button id="add-custom-ex-btn"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <ul id="custom-ex-items" class="manage-list"></ul>
+                    </div>
+                </div>
+
             </div>
+
+            <div class="section-spacer"></div>
         </div>
 
-        <!-- Gym Page -->
-        <div id="gym-page" class="page">
-            <header class="header">
-                <div class="logo-area">
-                    <h1 class="logo">헬스장 <span>Gym Finder & Community</span></h1>
-                </div>
-            </header>
 
-            <!-- Section 1: Nearby Gym Search -->
-            <section class="gym-search-section">
+        <!-- ══════════════════════════════════════════
+             TAB 3: 헬스장
+        ══════════════════════════════════════════ -->
+        <div id="gym-page" class="page">
+
+            <div class="gym-hero">
+                <div class="gym-hero-title">헬스장 <span style="font-size:18px;">🏋️</span></div>
+                <div class="gym-hero-sub">Gym Finder &amp; Community</div>
+            </div>
+
+            <!-- Nearby Gym Search -->
+            <div class="gym-section gym-search-section">
                 <h2 class="section-title"><i class="fa-solid fa-location-dot"></i> 주변 헬스장</h2>
                 <div class="gym-search-controls">
                     <button id="find-gyms-btn" class="find-gyms-btn">
@@ -295,10 +341,10 @@
                     <span id="gym-search-status" class="gym-search-status"></span>
                 </div>
                 <div id="gym-list" class="gym-list"></div>
-            </section>
+            </div>
 
-            <!-- Section 2: Current Check-in Status -->
-            <section id="checkin-status-section" class="checkin-status-section" style="display:none">
+            <!-- Check-in Status -->
+            <div id="checkin-status-section" class="gym-section checkin-status-section" style="display:none">
                 <h2 class="section-title"><i class="fa-solid fa-circle-check"></i> 현재 체크인</h2>
                 <div class="checkin-card">
                     <div class="checkin-info">
@@ -309,10 +355,10 @@
                         <i class="fa-solid fa-right-from-bracket"></i> 체크아웃
                     </button>
                 </div>
-            </section>
+            </div>
 
-            <!-- Section 3: Community Gym Ranking -->
-            <section id="gym-ranking-section" class="gym-ranking-section" style="display:none">
+            <!-- Community Ranking -->
+            <div id="gym-ranking-section" class="gym-section gym-ranking-section" style="display:none">
                 <h2 class="section-title"><i class="fa-solid fa-trophy"></i> 이 헬스장 커뮤니티 랭킹</h2>
                 <div class="ranking-tabs">
                     <button class="ranking-tab-btn active" data-exercise="squat" onclick="switchRankingTab('squat')">🏋️ 스쿼트</button>
@@ -328,27 +374,50 @@
                         <button onclick="submitRankingForm()" class="submit-ranking-btn">등록</button>
                     </div>
                 </div>
-            </section>
+            </div>
+
+            <div class="section-spacer"></div>
         </div>
 
-        <!-- Plan Modal -->
-        <div id="plan-modal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3><span id="selected-date-display">Date</span> Plans</h3>
-                    <button class="close-modal">&times;</button>
+
+        <!-- ══════════════════════════════════════════
+             BOTTOM NAVIGATION
+        ══════════════════════════════════════════ -->
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-target="workout-page">
+                <i class="fa-solid fa-house"></i>
+                <span>운동</span>
+            </button>
+            <button class="tab-btn" data-target="mypage">
+                <i class="fa-solid fa-user"></i>
+                <span>마이</span>
+            </button>
+            <button class="tab-btn" data-target="gym-page">
+                <i class="fa-solid fa-dumbbell"></i>
+                <span>헬스장</span>
+            </button>
+        </nav>
+
+    </div><!-- /app-shell -->
+
+    <!-- Plan Modal (bottom sheet) -->
+    <div id="plan-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><span id="selected-date-display">Date</span> Plans</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="plan-input-group">
+                    <input type="text" id="plan-exercise" placeholder="운동 종목" list="exercise-suggestions">
+                    <input type="number" id="plan-weight" placeholder="목표 (kg)">
+                    <button id="add-plan-btn">추가</button>
                 </div>
-                <div class="modal-body">
-                    <div class="plan-input-group">
-                        <input type="text" id="plan-exercise" placeholder="Exercise" list="exercise-suggestions">
-                        <input type="number" id="plan-weight" placeholder="Goal (kg)">
-                        <button id="add-plan-btn">Add Plan</button>
-                    </div>
-                    <ul id="day-plan-list" class="manage-list"></ul>
-                </div>
+                <ul id="day-plan-list" class="manage-list"></ul>
             </div>
         </div>
     </div>
+
     <script src="main.js"></script>
 </body>
 </html>
