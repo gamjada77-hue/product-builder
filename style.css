@@ -664,6 +664,92 @@ body { background-color: var(--bg-color); font-family: var(--font-family); color
     line-height: 1.8;
 }
 
+/* =========================================================
+   TRAINING SETTINGS — 마이페이지 운동 설정 UI
+   ========================================================= */
+.training-settings-area {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.setting-group {
+    margin-bottom: 14px;
+}
+
+.setting-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+}
+
+.setting-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.setting-option {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 13px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border-color);
+    background: #f8f9fa;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.18s;
+    user-select: none;
+}
+
+.setting-option input[type="radio"] {
+    display: none;
+}
+
+.setting-option:has(input:checked) {
+    border-color: var(--accent-color);
+    background: #ede9fe;
+    color: var(--accent-color);
+}
+
+.setting-option:hover {
+    border-color: var(--accent-color);
+    background: #f0f0ff;
+}
+
+.opt-icon { font-size: 15px; }
+.opt-text { font-weight: 700; }
+
+/* Weekly plan card — today highlight + goal tag */
+.weekly-plan-card.today-card {
+    border: 2px solid var(--accent-color);
+    box-shadow: 0 4px 16px rgba(79,70,229,0.12);
+}
+
+.plan-goal-tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--accent-light);
+    color: var(--accent-color);
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.5px;
+}
+
+/* Plan split-type badge — Upper/Lower/Full 색상 추가 */
+.plan-day-type[style*="7c3aed"] { /* Upper */ }
+.plan-day-type[style*="d97706"] { /* Lower */ }
+.plan-day-type[style*="dc2626"] { /* Full */ }
+
 @media (max-width: 900px) { .mypage-layout { grid-template-columns: 1fr; } }
 @media (max-width: 768px) {
     .weekly-plan-grid { grid-template-columns: repeat(4, 1fr); }

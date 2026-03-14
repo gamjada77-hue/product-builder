@@ -1,3 +1,10 @@
+// XSS 방어 유틸리티
+function escapeHtml(str) {
+    return String(str ?? '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- State & Navigation ---
     const tabBtns = document.querySelectorAll('.tab-btn');
@@ -276,27 +283,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- My Page Profile & Management ---
     const userForm = document.getElementById('user-info-form');
+
     function loadUserInfo() {
-        const fields = ['nickname', 'height', 'weight'];
-        fields.forEach(f => { if (userInfo[f]) document.getElementById(`user-${f}`).value = userInfo[f]; });
+        const fields = ['nickname', 'height', 'weight', 'goalWeight'];
+        fields.forEach(f => {
+            const el = document.getElementById(`user-${f.replace('goalWeight', 'goal-weight')}`);
+            if (el && userInfo[f]) el.value = userInfo[f];
+        });
+        // Load training settings radio buttons
+        const settingMap = {
+            'workout-goal': userInfo.goal || 'hypertrophy',
+            'workout-freq': String(userInfo.frequency || '4'),
+            'workout-exp': userInfo.experience || 'beginner',
+            'workout-split': userInfo.splitPref || 'auto',
+        };
+        Object.entries(settingMap).forEach(([name, val]) => {
+            const el = document.querySelector(`input[name="${name}"][value="${val}"]`);
+            if (el) el.checked = true;
+        });
+        if (userInfo.gender) {
+            const g = document.querySelector(`input[name="gender"][value="${userInfo.gender}"]`);
+            if (g) g.checked = true;
+        }
+        if (userInfo.character) {
+            document.querySelectorAll('.char-option').forEach(o => o.classList.remove('selected'));
+            const c = document.querySelector(`.char-option[data-char="${userInfo.character}"]`);
+            if (c) c.classList.add('selected');
+        }
         updateProfileDisplay();
     }
 
     function updateProfileDisplay() {
         document.getElementById('display-nickname').textContent = userInfo.nickname || '반가워요!';
         document.getElementById('display-weight').textContent = userInfo.weight || '0.0';
+        const h = parseFloat(userInfo.height), w = parseFloat(userInfo.weight);
+        const gw = parseFloat(userInfo.goalWeight);
+        if (h && w) {
+            const bmi = (w / ((h / 100) ** 2)).toFixed(1);
+            document.getElementById('user-bmi').textContent = bmi;
+        }
+        if (w && gw) {
+            const diff = (w - gw).toFixed(1);
+            document.getElementById('weight-to-goal').textContent = diff > 0 ? `-${diff}kg` : `+${Math.abs(diff)}kg`;
+        }
         updateRecommendations(userInfo.weight);
     }
 
     userForm.onsubmit = (e) => {
         e.preventDefault();
         userInfo.nickname = document.getElementById('user-nickname').value;
-        userInfo.height = document.getElementById('user-height').value;
-        userInfo.weight = document.getElementById('user-weight').value;
+        userInfo.height = parseFloat(document.getElementById('user-height').value) || userInfo.height;
+        userInfo.weight = parseFloat(document.getElementById('user-weight').value) || userInfo.weight;
+        userInfo.goalWeight = parseFloat(document.getElementById('user-goal-weight').value) || userInfo.goalWeight;
+        userInfo.gender = document.querySelector('input[name="gender"]:checked')?.value || 'male';
+        userInfo.goal = document.querySelector('input[name="workout-goal"]:checked')?.value || 'hypertrophy';
+        userInfo.frequency = parseInt(document.querySelector('input[name="workout-freq"]:checked')?.value) || 4;
+        userInfo.experience = document.querySelector('input[name="workout-exp"]:checked')?.value || 'beginner';
+        userInfo.splitPref = document.querySelector('input[name="workout-split"]:checked')?.value || 'auto';
         localStorage.setItem('kintore-user-info-v5', JSON.stringify(userInfo));
         updateProfileDisplay();
         renderWeeklyPlan();
-        alert('저장되었습니다.');
+        // Visual feedback (no alert)
+        const btn = userForm.querySelector('.save-user-btn');
+        btn.textContent = '✓ 저장 완료!';
+        setTimeout(() => { btn.textContent = '설정 저장'; }, 1800);
     };
 
     function updateRecommendations(w) {
@@ -357,6 +407,9 @@ document.addEventListener('DOMContentLoaded', () => {
         Push: ['벤치프레스', '인클라인벤치', '오버헤드프레스', '딥스'],
         Pull: ['데드리프트', '바벨로우', '랫풀다운', '풀업'],
         Legs: ['스쿼트', '레그프레스', '런지', '레그컬'],
+        Upper: ['벤치프레스', '오버헤드프레스', '바벨로우', '풀업'],
+        Lower: ['스쿼트', '레그프레스', '런지', '레그컬'],
+        Full:  ['스쿼트', '벤치프레스', '데드리프트', '풀업'],
     };
 
     const BASE_MULTIPLIERS = {
@@ -386,85 +439,114 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const bodyWeight = parseFloat(userInfo.weight) || 70;
         const baseMultiplier = BASE_MULTIPLIERS[exerciseName] || 0.5;
+        const expFactor = { beginner: 0.85, intermediate: 1.0, advanced: 1.1 }[userInfo.experience] || 1.0;
 
         let baseWeight;
         if (last28.length > 0) {
             baseWeight = Math.max(...last28.map(w => parseFloat(w.weight) || 0));
         } else {
-            baseWeight = Math.round(bodyWeight * baseMultiplier / 2.5) * 2.5;
+            baseWeight = Math.round(bodyWeight * baseMultiplier * expFactor / 2.5) * 2.5;
         }
 
-        let multiplier = 1.0;
-        if (last7.length >= 3) multiplier = 1.025;
-        else if (last28.length >= 9) multiplier = 1.05;
+        let progressMultiplier = 1.0;
+        if (last7.length >= 3) progressMultiplier = 1.025;
+        else if (last28.length >= 9) progressMultiplier = 1.05;
 
-        const recommended = Math.round(baseWeight * multiplier / 2.5) * 2.5;
+        const recommended = Math.round(baseWeight * progressMultiplier / 2.5) * 2.5;
         const maxSafe = bodyWeight * baseMultiplier * 2.5;
         return Math.min(Math.max(recommended, 20), maxSafe);
     }
 
     function assignPPLSplit(coverage) {
-        const totals = [coverage.push, coverage.pull, coverage.legs];
-        const min = Math.min(...totals);
+        const min = Math.min(coverage.push, coverage.pull, coverage.legs);
         let weakest = 'push';
         if (coverage.pull === min) weakest = 'pull';
         if (coverage.legs === min) weakest = 'legs';
+        // PPL cycle starting from weakest
+        const cycle = { push: ['Push','Pull','Legs'], pull: ['Pull','Push','Legs'], legs: ['Legs','Push','Pull'] };
+        return cycle[weakest];
+    }
 
-        const templates = {
-            push: ['Push', 'Pull', 'Legs', 'Push', 'Pull', 'Legs', 'Rest'],
-            pull: ['Pull', 'Push', 'Legs', 'Pull', 'Push', 'Legs', 'Rest'],
-            legs: ['Legs', 'Push', 'Pull', 'Legs', 'Push', 'Pull', 'Rest'],
+    function buildWorkoutSchedule(coverage) {
+        const splitPref = userInfo.splitPref || 'auto';
+        const freqDays = parseInt(userInfo.frequency) || 4;
+
+        // Which day indices (0=Mon..6=Sun) are workout days
+        const freqPatterns = {
+            3: [0, 2, 4],
+            4: [0, 1, 3, 4],
+            5: [0, 1, 2, 4, 5],
+            6: [0, 1, 2, 3, 4, 5],
         };
-        return templates[weakest];
+        const workoutIndices = new Set(freqPatterns[freqDays] || freqPatterns[4]);
+
+        // Determine exercise type cycle
+        let typeCycle;
+        if (splitPref === 'upper-lower') {
+            typeCycle = ['Upper', 'Lower'];
+        } else if (splitPref === 'full') {
+            typeCycle = ['Full'];
+        } else {
+            // auto or ppl
+            typeCycle = assignPPLSplit(coverage);
+        }
+
+        const schedule = [];
+        let cycleIdx = 0;
+        for (let i = 0; i < 7; i++) {
+            if (workoutIndices.has(i)) {
+                schedule.push(typeCycle[cycleIdx % typeCycle.length]);
+                cycleIdx++;
+            } else {
+                schedule.push('Rest');
+            }
+        }
+        return schedule;
     }
 
     function generateWeeklyPlan() {
         const coverage = analyzeMuscleGroupCoverage();
-        const split = assignPPLSplit(coverage);
+        const schedule = buildWorkoutSchedule(coverage);
         const today = new Date();
-        const plan = [];
 
-        for (let i = 0; i < 7; i++) {
+        return schedule.map((type, i) => {
             const day = new Date(today);
             day.setDate(today.getDate() + i);
             const dayName = ['일', '월', '화', '수', '목', '금', '토'][day.getDay()];
-            const splitDay = split[i];
-
-            if (splitDay === 'Rest') {
-                plan.push({ day: dayName, date: `${day.getMonth() + 1}/${day.getDate()}`, type: 'Rest', exercises: [] });
-            } else {
-                const exercises = EXERCISE_TEMPLATES[splitDay].slice(0, 3).map(name => ({
-                    name,
-                    weight: detectProgressiveOverload(name),
-                }));
-                plan.push({ day: dayName, date: `${day.getMonth() + 1}/${day.getDate()}`, type: splitDay, exercises });
-            }
-        }
-        return plan;
+            const dateStr = `${day.getMonth() + 1}/${day.getDate()}`;
+            if (type === 'Rest') return { day: dayName, date: dateStr, type: 'Rest', exercises: [] };
+            const exercises = (EXERCISE_TEMPLATES[type] || []).slice(0, 3).map(name => ({
+                name, weight: detectProgressiveOverload(name),
+            }));
+            return { day: dayName, date: dateStr, type, exercises };
+        });
     }
 
     function renderWeeklyPlan() {
         const container = document.getElementById('weekly-plan-container');
         if (!container) return;
         const plan = generateWeeklyPlan();
-        const typeColors = { Push: '#4f46e5', Pull: '#0891b2', Legs: '#059669', Rest: '#94a3b8' };
-        const typeIcons = { Push: '💪', Pull: '⚡', Legs: '🏋️', Rest: '😴' };
+        const typeColors = { Push: '#4f46e5', Pull: '#0891b2', Legs: '#059669', Rest: '#94a3b8', Upper: '#7c3aed', Lower: '#d97706', Full: '#dc2626' };
+        const typeIcons  = { Push: '💪', Pull: '⚡', Legs: '🏋️', Rest: '😴', Upper: '👆', Lower: '👇', Full: '🎯' };
+        const goalLabels = { hypertrophy: '근비대', strength: '근력', diet: '다이어트', health: '건강유지' };
+        const goalLabel  = goalLabels[userInfo.goal] || '';
 
-        container.innerHTML = plan.map(day => `
-            <div class="weekly-plan-card ${day.type === 'Rest' ? 'rest-day' : ''}">
+        container.innerHTML = plan.map((day, idx) => `
+            <div class="weekly-plan-card ${day.type === 'Rest' ? 'rest-day' : ''} ${idx === 0 ? 'today-card' : ''}">
                 <div class="plan-day-header">
                     <div class="plan-day-left">
                         <span class="plan-day-name">${day.day}</span>
                         <span class="plan-day-date">${day.date}</span>
                     </div>
-                    <span class="plan-day-type" style="color:${typeColors[day.type]}">${typeIcons[day.type]} ${day.type}</span>
+                    <span class="plan-day-type" style="color:${typeColors[day.type] || '#94a3b8'}">${typeIcons[day.type] || ''} ${day.type}</span>
                 </div>
                 ${day.exercises.map(ex => `
                     <div class="plan-exercise-row">
-                        <span class="plan-ex-name">${ex.name}</span>
+                        <span class="plan-ex-name">${escapeHtml(ex.name)}</span>
                         <span class="plan-ex-weight">${ex.weight}kg</span>
                     </div>
-                `).join('') || '<span class="plan-rest-text">오늘은 쉬어요</span>'}
+                `).join('') || '<span class="plan-rest-text">😴 오늘은 쉬어요</span>'}
+                ${idx === 0 && goalLabel ? `<div class="plan-goal-tag">${goalLabel}</div>` : ''}
             </div>
         `).join('');
     }
@@ -574,8 +656,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return `
             <div class="gym-list-item ${isCheckedIn ? 'checked-in' : ''}">
                 <div class="gym-info">
-                    <span class="gym-name">${g.name}</span>
-                    ${g.address ? `<span class="gym-address"><i class="fa-solid fa-map-pin"></i> ${g.address}</span>` : ''}
+                    <span class="gym-name">${escapeHtml(g.name)}</span>
+                    ${g.address ? `<span class="gym-address"><i class="fa-solid fa-map-pin"></i> ${escapeHtml(g.address)}</span>` : ''}
                     <span class="gym-distance"><i class="fa-solid fa-route"></i> ${(g.distance / 1000).toFixed(2)} km</span>
                 </div>
                 ${isCheckedIn
@@ -699,8 +781,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="ranking-row ${i === 0 ? 'rank-first' : ''}">
                 <span class="rank-position">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</span>
                 <span class="rank-nickname">
-                    ${entry.nickname}
-                    ${i === 0 ? `<span class="rank-badge">${badges[exercise]}</span>` : ''}
+                    ${escapeHtml(entry.nickname)}
+                    ${i === 0 ? `<span class="rank-badge">${escapeHtml(badges[exercise])}</span>` : ''}
                 </span>
                 <span class="rank-weight">${entry.weight}kg</span>
             </div>
@@ -766,7 +848,9 @@ document.addEventListener('DOMContentLoaded', () => {
         userInfo = {
             nickname: '운동왕', gender: 'male',
             height: 175, weight: 75, goalWeight: 70,
-            character: 'fa-user-ninja'
+            character: 'fa-user-ninja',
+            goal: 'hypertrophy', frequency: 4,
+            experience: 'intermediate', splitPref: 'auto',
         };
         localStorage.setItem('kintore-user-info-v5', JSON.stringify(userInfo));
 
