@@ -114,8 +114,26 @@ body { background-color: var(--bg-color); font-family: var(--font-family); color
 
 .user-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .user-input-group.full-width { grid-column: span 2; }
-.user-input-group label { font-size: 0.8rem; font-weight: 700; margin-bottom: 0.4rem; display: block; }
-.user-input-group input { padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); background: #f8fafc; }
+.user-input-group label { font-size: 0.8rem; font-weight: 700; margin-bottom: 0.4rem; display: block; color: var(--text-muted); }
+.user-input-group input { padding: 12px; border-radius: 8px; border: 1.5px solid var(--border-color); background: #f8fafc; width: 100%; font-size: 0.9rem; transition: border-color 0.2s; }
+.user-input-group input:focus { outline: none; border-color: var(--accent-color); background: white; }
+
+.save-user-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.3px;
+}
+.save-user-btn:hover { background: #4338ca; }
+.save-user-btn:active { transform: scale(0.98); }
 
 .character-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; }
 .char-option { background: #f8fafc; padding: 1rem; border-radius: 12px; text-align: center; cursor: pointer; border: 2px solid transparent; }
@@ -710,10 +728,22 @@ body { background-color: var(--bg-color); font-family: var(--font-family); color
 }
 
 .setting-option input[type="radio"] {
-    display: none;
+    /* visually hidden but accessible — not display:none */
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden; clip: rect(0,0,0,0);
+    white-space: nowrap;
 }
 
+/* Modern browsers: :has() selector */
 .setting-option:has(input:checked) {
+    border-color: var(--accent-color);
+    background: #ede9fe;
+    color: var(--accent-color);
+}
+
+/* JS fallback for browsers without :has() support */
+.setting-option.active {
     border-color: var(--accent-color);
     background: #ede9fe;
     color: var(--accent-color);
@@ -725,7 +755,7 @@ body { background-color: var(--bg-color); font-family: var(--font-family); color
 }
 
 .opt-icon { font-size: 15px; }
-.opt-text { font-weight: 700; }
+.opt-text { font-weight: 700; font-size: 13px; }
 
 /* Weekly plan card — today highlight + goal tag */
 .weekly-plan-card.today-card {
@@ -745,11 +775,6 @@ body { background-color: var(--bg-color); font-family: var(--font-family); color
     letter-spacing: 0.5px;
 }
 
-/* Plan split-type badge — Upper/Lower/Full 색상 추가 */
-.plan-day-type[style*="7c3aed"] { /* Upper */ }
-.plan-day-type[style*="d97706"] { /* Lower */ }
-.plan-day-type[style*="dc2626"] { /* Full */ }
-
 @media (max-width: 900px) { .mypage-layout { grid-template-columns: 1fr; } }
 @media (max-width: 768px) {
     .weekly-plan-grid { grid-template-columns: repeat(4, 1fr); }
@@ -760,4 +785,11 @@ body { background-color: var(--bg-color); font-family: var(--font-family); color
     .calendar-day { min-height: 60px; }
     .weekly-plan-grid { grid-template-columns: repeat(2, 1fr); }
     .gym-list-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+    /* 좁은 화면: 2열 form을 1열로 */
+    .user-form-grid { grid-template-columns: 1fr; }
+    .user-input-group.full-width { grid-column: span 1; }
+    /* 아바타 4열 → 2열 */
+    .character-grid { grid-template-columns: repeat(2, 1fr); }
+    /* 설정 옵션 12px로 키움 */
+    .setting-label { font-size: 12px; }
 }

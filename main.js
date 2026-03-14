@@ -343,6 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('kintore-user-info-v5', JSON.stringify(userInfo));
         updateProfileDisplay();
         renderWeeklyPlan();
+        initSettingOptionFallback();
         // Visual feedback (no alert)
         const btn = userForm.querySelector('.save-user-btn');
         btn.textContent = '✓ 저장 완료!';
@@ -906,10 +907,26 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('kintore-sample-loaded-v5', '1');
     }
 
+    // --- :has() 폴백: 구버전 브라우저용 .active 클래스 토글 ---
+    function initSettingOptionFallback() {
+        document.querySelectorAll('.setting-options').forEach(group => {
+            const options = group.querySelectorAll('.setting-option');
+            options.forEach(opt => {
+                const radio = opt.querySelector('input[type="radio"]');
+                if (radio && radio.checked) opt.classList.add('active');
+                opt.addEventListener('click', () => {
+                    options.forEach(o => o.classList.remove('active'));
+                    opt.classList.add('active');
+                });
+            });
+        });
+    }
+
     // --- Init ---
     initSampleData();
     initFirebase();
     loadUserInfo();
+    initSettingOptionFallback();
     renderWorkoutList();
     renderManageLists();
     renderCalendar();
