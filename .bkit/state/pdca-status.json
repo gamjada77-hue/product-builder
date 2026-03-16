@@ -1,0 +1,195 @@
+{
+  "version": "2.0",
+  "lastUpdated": "2026-03-16T08:36:34.681Z",
+  "activeFeatures": [
+    "torenote",
+    "scripts",
+    "firebase",
+    "layout",
+    "home",
+    "offline"
+  ],
+  "primaryFeature": "torenote",
+  "features": {
+    "torenote": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-16T07:11:21.191Z",
+        "lastUpdated": "2026-03-16T08:24:36.064Z"
+      },
+      "lastFile": "/home/user/torenote/src/app/layout.tsx"
+    },
+    "scripts": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-16T07:21:00.126Z",
+        "lastUpdated": "2026-03-16T07:26:46.272Z"
+      },
+      "lastFile": "/home/user/torenote/scripts/import-exercises.ts"
+    },
+    "firebase": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-16T07:54:47.476Z",
+        "lastUpdated": "2026-03-16T08:32:28.851Z"
+      },
+      "lastFile": "/home/user/torenote/src/lib/firebase/firebaseAdmin.ts"
+    },
+    "layout": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-16T08:20:25.565Z",
+        "lastUpdated": "2026-03-16T08:20:25.565Z"
+      },
+      "lastFile": "/home/user/torenote/src/components/layout/BottomNav.tsx"
+    },
+    "home": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-16T08:20:51.295Z",
+        "lastUpdated": "2026-03-16T08:21:25.877Z"
+      },
+      "lastFile": "/home/user/torenote/src/components/home/DietCard.tsx"
+    },
+    "offline": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-16T08:36:34.681Z",
+        "lastUpdated": "2026-03-16T08:36:34.681Z"
+      },
+      "lastFile": "/home/user/torenote/src/app/offline/page.tsx"
+    }
+  },
+  "pipeline": {
+    "currentPhase": 1,
+    "level": "Dynamic",
+    "phaseHistory": []
+  },
+  "session": {
+    "startedAt": "2026-03-16T06:52:12.284Z",
+    "onboardingCompleted": false,
+    "lastActivity": "2026-03-16T08:36:34.681Z"
+  },
+  "history": [
+    {
+      "timestamp": "2026-03-16T07:11:21.191Z",
+      "feature": "torenote",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T07:21:00.126Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T07:26:42.113Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T07:26:46.272Z",
+      "feature": "scripts",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T07:54:47.476Z",
+      "feature": "firebase",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T07:55:14.127Z",
+      "feature": "firebase",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T08:20:25.565Z",
+      "feature": "layout",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T08:20:51.295Z",
+      "feature": "home",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T08:21:05.378Z",
+      "feature": "home",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T08:21:25.877Z",
+      "feature": "home",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T08:21:36.824Z",
+      "feature": "torenote",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T08:24:28.713Z",
+      "feature": "torenote",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T08:24:36.064Z",
+      "feature": "torenote",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T08:32:28.851Z",
+      "feature": "firebase",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T08:36:34.681Z",
+      "feature": "offline",
+      "phase": "do",
+      "action": "updated"
+    }
+  ]
+}

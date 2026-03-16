@@ -6,9 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "import:exercises": "tsx scripts/import-exercises.ts"
   },
   "dependencies": {
+    "@serwist/core": "^9.5.7",
+    "@serwist/next": "^9.5.7",
+    "@serwist/precaching": "^9.5.7",
+    "@serwist/routing": "^9.5.7",
+    "@serwist/strategies": "^9.5.7",
+    "firebase": "^12.10.0",
+    "firebase-admin": "^13.7.0",
+    "lucide-react": "^0.577.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"
@@ -18,9 +27,11 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^16.6.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }
